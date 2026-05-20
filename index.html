@@ -156,6 +156,42 @@
       border-radius: 0;
     }
 
+    /* Standalone code snippet figure (e.g. CLAUDE.md schema excerpt) */
+    .reveal figure.schema-snippet {
+      margin: 0;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .reveal figure.schema-snippet .snippet-title {
+      padding: 0.4em 0.9em;
+      font-size: 0.5em;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(74, 144, 226, 0.08);
+      border-bottom: 1px solid var(--border);
+    }
+    .reveal figure.schema-snippet .snippet-title .muted { color: var(--muted); font-weight: 400; }
+    .reveal figure.schema-snippet pre.snippet-code {
+      margin: 0;
+      box-shadow: none;
+      width: 100%;
+    }
+    .reveal figure.schema-snippet pre.snippet-code code {
+      background: #0b1020;
+      font-size: 0.42em;
+      line-height: 1.45;
+      padding: 0.9em 1em;
+      max-height: 460px;
+      white-space: pre;
+      overflow-x: auto;
+      border-radius: 0;
+      display: block;
+    }
+
     /* Screenshot figure (replaces media-placeholder when a real image is in) */
     .reveal figure.shot {
       margin: 0;
@@ -179,6 +215,20 @@
       color: var(--muted);
       text-align: center;
       letter-spacing: 0.04em;
+    }
+    /* Phone-screenshot variant: tall portrait aspect, contained not cropped */
+    .reveal figure.shot.phone {
+      max-width: 280px;
+      margin: 0 auto;
+      background: #0a0f1d;
+    }
+    .reveal figure.shot.phone img {
+      max-height: 520px;
+      width: auto;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      border-radius: 10px 10px 0 0;
     }
 
     /* Compact-cards: equal-sized cards in a tight 2x2 grid (e.g. "What helped most") */
@@ -747,14 +797,32 @@ Local LLM serving only.
               <div class="card"><h4>Migrations</h4><p>Claude generates SQL, I review, it runs against Postgres.</p></div>
               <div class="card"><h4>Pruning &amp; normalization</h4><p>Periodic clean-up queries, dedupe runs, column-type fixes.</p></div>
             </div>
-            <div class="media-placeholder">
-              <span class="icon">🗄️</span>
-              <span class="label">Screenshot placeholder</span>
-              <span>Sample CLAUDE.md schema block / psql session</span>
-            </div>
+            <figure class="snippet schema-snippet">
+              <div class="snippet-title">CLAUDE.md <span class="muted">(data model prompt)</span></div>
+<pre class="snippet-code"><code>## Data model
+
+Design the Postgres schema for collected posts.
+Pick column types and indexes yourself; just make sure
+the following fields exist on each post:
+
+- title
+- URL
+- community (which site it came from)
+- global_id  (cross-community unique key)
+- fetched_at (when we collected it)
+- view_count
+- upvotes
+- downvotes
+- summary    (filled later by the LLM)
+- is_nsfw    (filled later by the NSFW classifier)
+- …and anything else you think we'll obviously need
+
+Generate the migration SQL and put it under db/migrations/.
+Don't change the schema after this without a new migration.</code></pre>
+            </figure>
           </div>
           <aside class="notes">
-            Keeping the schema documented in CLAUDE.md meant Claude always knew the data model. Crawl code and query code stayed in sync.
+            [Point at the snippet.] This is the entire data-model section in CLAUDE.md. Notice what's *not* there — I didn't write a single line of SQL. I just listed the fields I knew I needed: title, URL, community, a cross-community global_id, fetched timestamp, vote counts, and a couple of null-until-filled-later columns. Claude picked the column types, picked sensible indexes, and dropped a migration into db/migrations/ on its own. The point of putting this prompt in CLAUDE.md isn't to hand-craft the schema — it's to give every future session the same starting context, so the crawler code and the query code never drift apart. When I need a new field later, I add a line to this list and ask for another migration.
           </aside>
         </section>
         <section>
@@ -1172,14 +1240,13 @@ flowchart LR
               </ul>
               <p class="callout">No catch-up scrolling. No FOMO. Just what mattered.</p>
             </div>
-            <div class="media-placeholder">
-              <span class="icon">📲</span>
-              <span class="label">Screenshot placeholder</span>
-              <span>Telegram digest message</span>
-            </div>
+            <figure class="shot phone">
+              <img src="assets/images/telegram-digest.jpeg" alt="Telegram digest message — daily summary of community posts" />
+              <figcaption>This morning's digest, on my phone.</figcaption>
+            </figure>
           </div>
           <aside class="notes">
-            Drop in a real screenshot here. The message is short — if a topic is interesting, I tap through.
+            [Point at the screenshot.] This is an actual morning digest. The header is the date. Then the day's headlines as bullets — usually 5 to 8 across all communities. Below that, per-community highlights. The whole thing fits on one screen, no scrolling needed. If a topic is interesting, I tap through to the original post. The point isn't that the digest is comprehensive — it's that it's enough to decide whether to dig in.
           </aside>
         </section>
         <section>
