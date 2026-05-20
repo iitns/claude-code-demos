@@ -22,19 +22,19 @@
 > Let me set the destination first. By the end you'll know what got built, with what pieces I already had, and where Claude Code actually fit in. We move through motivation, infra, the design phase, ops, the agent split, and lessons. There's an outcome section and an "applications" section at the end.
 
 ### 1.2 What did I need?
-> Three things I wanted. Collect posts from multiple online communities on a schedule. Store them somewhere I can list and search. Summarize them and deliver a digest to my phone. Notice these are *outcomes* — not engineering choices. Keeping outcome separate from implementation made the conversation with Claude Code much cleaner.
+> Three things I wanted. Collect posts from multiple online communities on a schedule. Store them somewhere I can list and search. Summarize them and deliver a digest to my phone.
 
 ### 1.3 What I already had
-> I didn't start from zero on infra. I had a homelab running Kubernetes with Argo CD already syncing. I had a Mac Studio that was mostly idle — perfect for local LLM inference. I had a free-tier GCP VM that's always on with a public IP, so it's the natural home for anything that needs to be reachable from outside the home network. And of course Claude Code *and* Codex — two coding agents, and a willingness to let them drive.
+> I didn't start from zero on infra. I had a homelab running Kubernetes with Argo CD already syncing. I had a Mac Studio that was mostly idle — perfect for local LLM inference. I had a free-tier GCP VM that's always on with a public IP, so it's the natural home for anything that needs to be reachable from outside the home network. And of course Claude Code *and* Codex — two coding agents.
 
 ### 1.4 What helped most
-> If you remember only one slide from this talk, make it this one. Four things made the difference. The top row is the conceptual pair — *how to think*. The bottom row is the concrete mechanics — *how to execute*.
+> Four things to call out. The top row is the conceptual pair — *how to think*. The bottom row is the concrete mechanics — *how to execute*.
 >
-> **One — plan big, then split into agent-shaped tasks.** The trick isn't that you plan; it's *how* you slice. Each task should end up being either an operation, or a piece of code — never both at once. That keeps each agent's purpose unambiguous, and it's how I dodged content rot as the project grew.
+> **One — plan big, then split into smaller chunks.** Plan the whole system, then slice the plan into agent-shaped tasks: one session per machine, one task per agent, and each chunk is either an *operation* or a piece of *code* — never both. Smaller surface area means cleaner state and fewer context-bleed surprises. This is how I ran homelab, Mac Studio, and GCP work in parallel without them tangling, and it's the single biggest reason content didn't rot as the project grew.
 >
 > **Two — ship the bare minimum first, then iterate.** This is the humility one. My v1 goal, literally, was "works enough that I could demo this from a United flight." Wi-fi flaky, no help from anyone. It mostly *didn't* work that first version. But every refinement after was driven by a real failure I'd seen — not by speculating about what might go wrong.
 >
-> **Three — split tasks into smaller chunks.** One session per machine, one task per agent. Smaller surface area means cleaner state and fewer context-bleed surprises. This is how I ran homelab, Mac Studio, and GCP work in parallel without them tangling.
+> **Three — pre-write a concrete CLAUDE.md.** The more specific your spec, the closer the first output. You *can* refine by ping-ponging with Claude or Codex, but that burns time and tokens fast — and the gap between "rough idea" and "Claude can act on this" is exactly what a planning model is good at closing. So draft the CLAUDE.md ahead of time. Honestly: I use ChatGPT or Gemini for that draft pass, then hand the result to Claude. Different tools, complementary jobs.
 >
 > **Four — keep agents' lanes from crossing.** When you're running multiple agents in parallel — Claude Code on one side, Codex on the other — make sure their work areas don't overlap. Two agents editing the same file or touching the same cluster object gets you merge conflicts at best, silent drift between mental models at worst. Draw the lanes explicitly, and re-check them when scope changes.
 

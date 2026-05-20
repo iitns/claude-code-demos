@@ -494,16 +494,16 @@
           <h3>What helped most</h3>
           <div class="grid-2">
             <div class="card success">
-              <h4>1 · Plan big, then split into agent-shaped tasks</h4>
-              <p>Tasks become either an <em>operation</em> or a piece of <em>code</em> — never both. Each chunk fits one agent's job. Keeps purpose unambiguous and dodges content rot as the project grows.</p>
+              <h4>1 · Plan big, then split into smaller chunks</h4>
+              <p>Slice the plan into agent-shaped tasks — each chunk is either an <em>operation</em> or a piece of <em>code</em>, never both. One session per machine, one task per agent. Keeps purpose unambiguous and dodges content rot.</p>
             </div>
             <div class="card success">
               <h4>2 · Ship the bare minimum first, then iterate</h4>
               <p>Goal v1: <em>"works enough that I could demo it from a United flight."</em> It mostly didn't — so every refinement after was driven by a real failure, not speculation.</p>
             </div>
             <div class="card success">
-              <h4>3 · Split tasks into smaller chunks</h4>
-              <p>One session per machine, one task per agent. Smaller surface area = cleaner state and fewer context-bleed surprises.</p>
+              <h4>3 · Pre-write a concrete CLAUDE.md</h4>
+              <p>The more specific the spec, the closer the first output. Ping-ponging with Claude to refine works, but burns time and tokens. Draft the CLAUDE.md ahead in ChatGPT or Gemini, then hand it over.</p>
             </div>
             <div class="card success">
               <h4>4 · Keep agents' lanes from crossing</h4>
@@ -511,7 +511,7 @@
             </div>
           </div>
           <aside class="notes">
-            Four things that paid off the most. The top row is the conceptual pair — *how to think*: plan in agent-shaped tasks, then ship the bare minimum and iterate. The bottom row is the concrete mechanics — *how to execute*: keep each chunk small enough to fit one session, and when you run multiple agents in parallel, draw clear non-overlapping lanes so they don't step on each other's work. If you remember one slide from this talk, it's this one.
+            Four things that paid off the most. Top row is the conceptual pair — *how to think*: plan big and chunk it down, then ship the bare minimum and let real failures drive iteration. Bottom row is the concrete mechanics — *how to execute*: front-load specificity into CLAUDE.md so the agent doesn't have to guess (using another LLM like ChatGPT or Gemini for the draft is fair game and saves a lot of Claude-Codex ping-pong), and when running multiple agents in parallel, draw clear non-overlapping lanes so they don't step on each other's work. If you remember one slide from this talk, this is it.
           </aside>
         </section>
       </section>
