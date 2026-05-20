@@ -34,9 +34,9 @@
 >
 > **Two — ship the bare minimum first, then iterate.** This is the humility one. My v1 goal, literally, was "works enough that I could demo this from a United flight." Wi-fi flaky, no help from anyone. It mostly *didn't* work that first version. But every refinement after was driven by a real failure I'd seen — not by speculating about what might go wrong.
 >
-> **Three — split by machine.** One session per box keeps state local. Decisions for the homelab don't pollute decisions for the Mac Studio.
+> **Three — split tasks into smaller chunks.** One session per machine, one task per agent. Smaller surface area means cleaner state and fewer context-bleed surprises. This is how I ran homelab, Mac Studio, and GCP work in parallel without them tangling.
 >
-> **Four — split by agent type.** Ops tasks go to Claude Code, because it lives in the terminal. Code tasks go to Codex, because it lives in the repo workflow. Right tool, right lane.
+> **Four — keep agents' lanes from crossing.** When you're running multiple agents in parallel — Claude Code on one side, Codex on the other — make sure their work areas don't overlap. Two agents editing the same file or touching the same cluster object gets you merge conflicts at best, silent drift between mental models at worst. Draw the lanes explicitly, and re-check them when scope changes.
 
 ## 2. Motivation (~2 min)
 
@@ -240,11 +240,13 @@
 > The collection pipeline is the foundation. Everything else is a remix.
 
 ### 9.2 Takeaways
-> Four things to remember.
+> Five things to remember.
 >
 > *Plan first, code second.* CLAUDE.md is your contract with the agent.
 >
 > *Split tasks into smaller chunks.* One session per box keeps state clean.
+>
+> *Keep agents' lanes from crossing.* If you run multiple agents in parallel, separate their areas cleanly — overlap creates conflicts and silent drift.
 >
 > *Engineering knowledge still matters.* Our background is the edge non-engineers don't have — agents amplify it, they don't replace it.
 >

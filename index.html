@@ -502,16 +502,16 @@
               <p>Goal v1: <em>"works enough that I could demo it from a United flight."</em> It mostly didn't — so every refinement after was driven by a real failure, not speculation.</p>
             </div>
             <div class="card success">
-              <h4>3 · Split by machine</h4>
-              <p>Same principle, applied to hardware. One session per box keeps state local and ops decisions scoped.</p>
+              <h4>3 · Split tasks into smaller chunks</h4>
+              <p>One session per machine, one task per agent. Smaller surface area = cleaner state and fewer context-bleed surprises.</p>
             </div>
             <div class="card success">
-              <h4>4 · Split by agent type</h4>
-              <p>Ops tasks → Claude Code (terminal, SSH, kubectl). Code tasks → Codex (repo, PRs). Right tool, right lane.</p>
+              <h4>4 · Keep agents' lanes from crossing</h4>
+              <p>When multiple agents work in parallel, make sure their work areas don't overlap. Two agents editing the same file or the same cluster object = merge conflicts or silent drift.</p>
             </div>
           </div>
           <aside class="notes">
-            Four things that paid off the most. The top row is the conceptual pair — plan in agent-shaped tasks, ship the bare minimum and iterate. The bottom row is the concrete mechanics — split by machine, split by agent type. If you remember one slide from this talk, it's this one.
+            Four things that paid off the most. The top row is the conceptual pair — *how to think*: plan in agent-shaped tasks, then ship the bare minimum and iterate. The bottom row is the concrete mechanics — *how to execute*: keep each chunk small enough to fit one session, and when you run multiple agents in parallel, draw clear non-overlapping lanes so they don't step on each other's work. If you remember one slide from this talk, it's this one.
           </aside>
         </section>
       </section>
@@ -1443,11 +1443,12 @@ flowchart LR
           <ul class="clean">
             <li><strong>Plan first, code second.</strong> CLAUDE.md is your contract with the agent.</li>
             <li><strong>Split tasks into smaller chunks.</strong> One session per box keeps state clean.</li>
+            <li><strong>Keep agents' lanes from crossing.</strong> If multiple agents work in parallel, separate their areas cleanly — overlap creates conflicts and silent drift.</li>
             <li><strong>Engineering knowledge still matters.</strong> Our background is the edge non-engineers don't have — agents amplify it, they don't replace it.</li>
             <li><strong>Data is the moat.</strong> Once collection runs, every new feature is days, not months.</li>
           </ul>
           <aside class="notes">
-            Four things. Plan with CLAUDE.md; split tasks small so each session has clean state; lean on your engineering background — agents don't make non-engineers into engineers, they make engineers faster; and remember that the data layer is what keeps paying off long after the first ship.
+            Five things. Plan with CLAUDE.md as the contract; split tasks small so each session has clean state; if you run multiple agents in parallel, draw clear non-overlapping lanes so they don't step on each other; lean on your engineering background — agents don't make non-engineers into engineers, they make engineers faster; and remember that the data layer is what keeps paying off long after the first ship.
           </aside>
         </section>
         <section class="cta-slide" data-state="cta-collapsed">
