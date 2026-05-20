@@ -6,9 +6,11 @@
 
 ---
 
-## Title (~30s)
+## Title (~45s)
 
-> Hi everyone. I'm Janghan. Today I want to share a side project I built — a personal aggregator that crawls a bunch of online communities and sends me a morning digest. The system itself isn't the point of the talk. The point is *how* I built it, working with Claude Code and Codex as collaborators. So this is a Zero-to-One story, but the focus is on the workflow, not the code.
+> Hi everyone. I'm Janghan. Today I want to share a side project I built — a personal aggregator that crawls a bunch of online communities and sends me a morning digest.
+>
+> Before we start, one quick framing note. **This talk is about how I used Claude Code to go from zero to one — the workflow, the prompts, the way work was split across agents and machines. It is *not* a discussion of the engineering decisions inside the project.** I'm not going to debate why Postgres over MongoDB, or Airflow over Prefect, or why two-pass summarization, and so on. Those choices are in the talk, but I'm treating them as given. If you want to dig into any of them, come find me after — happy to chat. For the next 25 minutes, the lens is squarely on *the build process with Claude*, not the architecture itself.
 
 ---
 

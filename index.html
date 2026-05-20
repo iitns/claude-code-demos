@@ -11,6 +11,92 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css" />
 
   <style>
+    /* === Avenir Next for Intuit — bundled web fonts === */
+    @font-face {
+      font-family: 'Avenir Next for Intuit';
+      font-weight: 100;
+      font-style: normal;
+      font-display: swap;
+      src: url('assets/fonts/avenir-next-intuit-100.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Avenir Next for Intuit';
+      font-weight: 100;
+      font-style: italic;
+      font-display: swap;
+      src: url('assets/fonts/avenir-next-intuit-100-italic.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Avenir Next for Intuit';
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+      src: url('assets/fonts/avenir-next-intuit-400.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Avenir Next for Intuit';
+      font-weight: 400;
+      font-style: italic;
+      font-display: swap;
+      src: url('assets/fonts/avenir-next-intuit-400-italic.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Avenir Next for Intuit';
+      font-weight: 500;
+      font-style: normal;
+      font-display: swap;
+      src: url('assets/fonts/avenir-next-intuit-500.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Avenir Next for Intuit';
+      font-weight: 500;
+      font-style: italic;
+      font-display: swap;
+      src: url('assets/fonts/avenir-next-intuit-500-italic.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Avenir Next for Intuit';
+      font-weight: 600;
+      font-style: normal;
+      font-display: swap;
+      src: url('assets/fonts/avenir-next-intuit-600.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Avenir Next for Intuit';
+      font-weight: 600;
+      font-style: italic;
+      font-display: swap;
+      src: url('assets/fonts/avenir-next-intuit-600-italic.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Avenir Next for Intuit';
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+      src: url('assets/fonts/avenir-next-intuit-700.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Avenir Next for Intuit';
+      font-weight: 700;
+      font-style: italic;
+      font-display: swap;
+      src: url('assets/fonts/avenir-next-intuit-700-italic.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Avenir Next for Intuit';
+      font-weight: 800;
+      font-style: normal;
+      font-display: swap;
+      src: url('assets/fonts/avenir-next-intuit-800.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Avenir Next for Intuit';
+      font-weight: 800;
+      font-style: italic;
+      font-display: swap;
+      src: url('assets/fonts/avenir-next-intuit-800-italic.woff2') format('woff2');
+    }
+
     /* === Zero to One with Claude Code — custom theme === */
     :root {
       --bg-deep: #0e1320;
@@ -22,14 +108,15 @@
       --muted: #8a99b3;
       --code-bg: #0b1020;
       --border: rgba(255, 255, 255, 0.08);
+      --font-sans: "Avenir Next for Intuit", "Avenir Next", "Avenir", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     .reveal {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: var(--font-sans);
       color: var(--text);
     }
     .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
-      font-family: 'Inter', sans-serif;
+      font-family: var(--font-sans);
       font-weight: 700;
       letter-spacing: -0.02em;
       text-transform: none;
@@ -154,6 +241,84 @@
       white-space: pre-wrap;
       word-break: break-word;
       border-radius: 0;
+    }
+
+    /* Interactive closing CTA slide */
+    .reveal section.cta-slide {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: stretch;
+      min-height: 600px;
+    }
+    .reveal section.cta-slide .cta-hero {
+      transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+                  margin 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+      text-align: center;
+    }
+    .reveal section.cta-slide .cta-hero h2 {
+      transition: font-size 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .reveal section.cta-slide .cta-hero .subtitle {
+      transition: opacity 0.4s ease, max-height 0.55s ease, margin 0.55s ease;
+      overflow: hidden;
+    }
+    .reveal section.cta-slide .cta-button {
+      display: inline-block;
+      margin-top: 1em;
+      padding: 0.55em 1.2em;
+      font-family: var(--font-sans);
+      font-size: 0.7em;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      background: transparent;
+      border: 1.5px solid var(--accent);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+                  opacity 0.3s ease, max-height 0.55s ease, margin 0.55s ease;
+    }
+    .reveal section.cta-slide .cta-button:hover {
+      background: var(--accent);
+      color: #0e1320;
+    }
+    .reveal section.cta-slide .cta-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5em;
+      margin-top: 1.5em;
+      opacity: 0;
+      transform: translateY(40px);
+      pointer-events: none;
+      transition: opacity 0.55s ease 0.15s, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.15s;
+    }
+
+    /* Expanded state — triggered by the button */
+    .reveal section.cta-slide[data-state="cta-expanded"] .cta-hero {
+      transform: translateY(-1.2em);
+    }
+    .reveal section.cta-slide[data-state="cta-expanded"] .cta-hero h2 {
+      font-size: 1.6em;
+    }
+    .reveal section.cta-slide[data-state="cta-expanded"] .cta-hero .subtitle {
+      opacity: 0;
+      max-height: 0;
+      margin: 0;
+    }
+    .reveal section.cta-slide[data-state="cta-expanded"] .cta-button {
+      opacity: 0;
+      max-height: 0;
+      margin: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      border-width: 0;
+      pointer-events: none;
+    }
+    .reveal section.cta-slide[data-state="cta-expanded"] .cta-cards {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
     }
 
     /* Standalone code snippet figure (e.g. CLAUDE.md schema excerpt) */
@@ -287,6 +452,8 @@
         <p class="meta"><span>Janghan Park</span> · <span>Intuit</span></p>
         <aside class="notes">
           Opening. Introduce yourself briefly. Frame the talk: a real story of going from idea to running system, using Claude Code as the primary collaborator. 15-30 min, can split into two 15-min halves.
+          <br/><br/>
+          **State the scope explicitly up front:** this talk is about *how I used Claude Code to go from zero to one* — the workflow, the prompts, the way work was split across agents and machines. It is *not* a discussion of engineering decisions inside the project (Postgres vs. MongoDB, Airflow vs. Prefect, two-pass summarization, etc.). Those choices are given; the lens is squarely on the build process with Claude. Offer to chat about architecture after the talk.
         </aside>
       </section>
 
@@ -316,11 +483,11 @@
           <ul class="clean">
             <li><strong>Homelab</strong> — Kubernetes cluster + Argo CD wired up</li>
             <li><strong>Mac Studio</strong> — sitting there waiting to run local LLMs</li>
-            <li><strong>Free GCP VM</strong> — small but always-on, good for health checks</li>
-            <li><strong>Claude Code</strong> — and a willingness to let it drive</li>
+            <li><strong>Free GCP VM</strong> — small but always-on, public IP — happy to host anything that needs to be reachable from outside</li>
+            <li><strong>Claude Code / Codex</strong> — and a willingness to let them drive</li>
           </ul>
           <aside class="notes">
-            I didn't start from zero on infra. The interesting part is how Claude Code stitched these existing pieces into something coherent.
+            I didn't start from zero on infra. Three pieces of hardware and two coding agents — Claude Code and Codex. The GCP VM is more than just a heartbeat-checker, by the way: it has a public IP, so anything that needs to be reachable from the outside world ends up there. The interesting part of the talk is how the agents stitched all of this into something coherent.
           </aside>
         </section>
         <section class="compact-cards">
@@ -331,20 +498,20 @@
               <p>Tasks become either an <em>operation</em> or a piece of <em>code</em> — never both. Each chunk fits one agent's job. Keeps purpose unambiguous and dodges content rot as the project grows.</p>
             </div>
             <div class="card success">
-              <h4>2 · Split by machine</h4>
+              <h4>2 · Ship the bare minimum first, then iterate</h4>
+              <p>Goal v1: <em>"works enough that I could demo it from a United flight."</em> It mostly didn't — so every refinement after was driven by a real failure, not speculation.</p>
+            </div>
+            <div class="card success">
+              <h4>3 · Split by machine</h4>
               <p>Same principle, applied to hardware. One session per box keeps state local and ops decisions scoped.</p>
             </div>
             <div class="card success">
-              <h4>3 · Split by agent type</h4>
+              <h4>4 · Split by agent type</h4>
               <p>Ops tasks → Claude Code (terminal, SSH, kubectl). Code tasks → Codex (repo, PRs). Right tool, right lane.</p>
-            </div>
-            <div class="card success">
-              <h4>4 · Ship the bare minimum first, then iterate</h4>
-              <p>Goal v1: <em>"works enough that I could demo it from a United flight."</em> It mostly didn't — so every refinement after was driven by a real failure, not speculation.</p>
             </div>
           </div>
           <aside class="notes">
-            Four things that paid off the most. Notice the pattern: three of them are about *splitting* — by purpose, by machine, by agent type. Splitting keeps each agent's context narrow and prevents content rot. The fourth is about humility: get something barely working first, then let real failures drive every next change. If you remember one slide from this talk, it's this one.
+            Four things that paid off the most. The top row is the conceptual pair — plan in agent-shaped tasks, ship the bare minimum and iterate. The bottom row is the concrete mechanics — split by machine, split by agent type. If you remember one slide from this talk, it's this one.
           </aside>
         </section>
       </section>
@@ -428,7 +595,7 @@
           <h3>How they're connected</h3>
           <div class="diagram-wrap">
             <!-- Inline network topology SVG -->
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" font-family="Inter, -apple-system, sans-serif">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" font-family="'Avenir Next for Intuit', 'Avenir Next', Avenir, -apple-system, sans-serif">
               <defs>
                 <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
                   <feGaussianBlur stdDeviation="3" result="blur"/>
@@ -666,7 +833,7 @@ flowchart LR
           <p class="subtitle" style="font-size:0.85em;margin-bottom:0.5em;">One master CLAUDE.md → one prompt → three per-machine CLAUDE.md files.</p>
 
           <div class="fanout-diagram">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 200" font-family="Inter, sans-serif">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 200" font-family="'Avenir Next for Intuit', 'Avenir Next', Avenir, sans-serif">
               <defs>
                 <linearGradient id="master-grad" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stop-color="#4a90e2"/><stop offset="100%" stop-color="#7b61ff"/>
@@ -890,7 +1057,7 @@ flowchart LR
           <h3>What it looks like in motion</h3>
           <div class="diagram-wrap">
             <!-- Inline multi-agent flow SVG -->
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 660" font-family="Inter, -apple-system, sans-serif">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 660" font-family="'Avenir Next for Intuit', 'Avenir Next', Avenir, -apple-system, sans-serif">
               <defs>
                 <filter id="glow2" x="-30%" y="-30%" width="160%" height="160%">
                   <feGaussianBlur stdDeviation="3" result="blur"/>
@@ -1102,32 +1269,34 @@ flowchart LR
           </aside>
         </section>
         <section>
-          <h3>Why the split worked — and where it bites</h3>
-          <div class="grid-2">
-            <div>
-              <h4 class="accent-success" style="font-size:0.85em;margin-bottom:0.3em;">Upsides</h4>
-              <ul class="clean">
-                <li><strong>No collision</strong> — different layers, never the same file</li>
-                <li><strong>Right tool for the layer</strong> — Claude's terminal, Codex's repo</li>
-                <li><strong>Easier review</strong> — Codex diffs in GitHub, Claude changes in the cluster</li>
-                <li><strong>Recoverable</strong> — Argo CD is the truth; re-sync to recover</li>
-                <li><strong>Token budget spread</strong> — two quotas, half the rate-limit pressure</li>
-              </ul>
-            </div>
-            <div>
-              <h4 class="accent-warm" style="font-size:0.85em;margin-bottom:0.3em;">Downsides</h4>
-              <ul class="clean">
-                <li><strong>Overlap = conflict</strong> — if both touch the same area, you get merge or state conflicts</li>
-                <li><strong>No shared memory</strong> — each agent remembers only its own work; the other can be blind to it</li>
-                <li class="muted" style="font-size:0.78em;padding-left:1.2em;border:none;">↳ <em>Mitigation:</em> have the agent re-read the current state from the code repo or the live cluster before acting</li>
-              </ul>
-            </div>
-          </div>
-          <p class="callout" style="margin-top:0.6em;">Two specialized agents beat one generalist — as long as you keep their lanes from crossing.</p>
+          <h3>Why the split worked</h3>
+          <h4 class="accent-success" style="font-size:0.9em;margin-bottom:0.4em;">Upsides</h4>
+          <ul class="clean">
+            <li><strong>No collision</strong> — different layers, never the same file</li>
+            <li><strong>Right tool for the layer</strong> — Claude's terminal, Codex's repo</li>
+            <li><strong>Easier review</strong> — Codex diffs in GitHub, Claude changes in the cluster</li>
+            <li><strong>Recoverable</strong> — Argo CD is the truth; re-sync to recover</li>
+            <li><strong>Token budget spread</strong> — two quotas, half the rate-limit pressure</li>
+          </ul>
           <aside class="notes">
-            Don't multiplex one agent across all jobs. Give each agent a lane. One practical upside on top of the obvious ones: rate limits. Everything through one agent and you hit the daily or weekly cap mid-task — split across two and you get roughly twice the runway.
+            Five reasons the lane split paid off. Walk down the list, but spend the most time on the last one because it's the practical motivation people don't expect. Rate limits: everything through one agent and you hit the daily or weekly cap mid-task — split across two and you get roughly twice the runway. The others are the obvious wins: different layers means no collision, each agent runs in its native tool, the diffs end up where review is easy, and Argo CD gives you a clean "source of truth" to re-sync against when something drifts.
+          </aside>
+        </section>
+        <section>
+          <h3>…and where it bites</h3>
+          <h4 class="accent-warm" style="font-size:0.9em;margin-bottom:0.4em;">Downsides</h4>
+          <ul class="clean">
+            <li><strong>Overlap = conflict</strong> — if both touch the same area, you get merge or state conflicts</li>
+            <li><strong>No shared memory</strong> — each agent remembers only its own work; the other can be blind to it</li>
+            <li class="muted" style="font-size:0.78em;padding-left:1.2em;border:none;">↳ <em>Mitigation:</em> have the agent re-read the current state from the code repo or the live cluster before acting</li>
+          </ul>
+          <p class="callout" style="margin-top:1em;">Two specialized agents beat one generalist — as long as you keep their lanes from crossing.</p>
+          <aside class="notes">
+            Now the downsides, because the split isn't free. First — overlap. If you accidentally let both agents touch the same file or the same cluster object, you get conflicts: either a git merge conflict, or worse, drift between what each agent *thinks* the world looks like. Second — they don't share memory. Each agent's notes and memory live in its own session. So if Claude Code just patched a deployment, Codex has no idea unless it goes and looks.
             <br/><br/>
-            Now the downsides, because this isn't free. First — overlap. If you accidentally let both agents touch the same file or the same cluster object, you get conflicts: either a git merge conflict, or worse, drift between what each agent thinks the world looks like. Second — they don't share memory. Each agent's notes and memory live in its own session. So if Claude Code just patched a deployment, Codex has no idea unless it goes and looks. The mitigation is the same in both cases: don't trust either agent's mental model. Have it re-read the source of truth — the code repo, the live cluster, the actual state — at the start of any change.
+            The mitigation is the same in both cases: don't trust either agent's mental model. Have it re-read the source of truth — the code repo, the live cluster, the actual state — at the start of any non-trivial change.
+            <br/><br/>
+            Then land the callout: two specialized agents beat one generalist — *as long as you keep their lanes from crossing*. The "as long as" matters; without that discipline, the split actively hurts.
           </aside>
         </section>
       </section>
@@ -1145,14 +1314,10 @@ flowchart LR
         <section>
           <h3>What broke early on</h3>
           <div class="grid-2">
-            <div class="col-stack">
-              <div class="card warm"><h4>K8s under-provisioned</h4><p>Pods up, but resources too tight. OOMs and throttling.</p></div>
-              <div class="card warm"><h4>Elasticsearch search misses</h4><p>Term extraction option wasn't set — relevant docs were invisible.</p></div>
-            </div>
-            <div class="col-stack">
-              <div class="card warm"><h4>Airflow DAG fragility</h4><p>No parallelism. One failure cascaded into the next day's run.</p></div>
-              <div class="card warm"><h4>Silent crawls</h4><p>Logs missing. Failed collections looked like empty days.</p></div>
-            </div>
+            <div class="card warm"><h4>K8s under-provisioned</h4><p>Pods up, but resources too tight. OOMs and throttling.</p></div>
+            <div class="card warm"><h4>Silent crawls</h4><p>Logs missing. Failed collections looked like empty days.</p></div>
+            <div class="card warm"><h4>Elasticsearch misses</h4><p>Term extraction option wasn't set — relevant docs were invisible.</p></div>
+            <div class="card warm"><h4>Airflow DAG fragility</h4><p>No parallelism. One failure cascaded into the next day's run.</p></div>
           </div>
           <aside class="notes">
             These were invisible until I started looking. Claude Code helped triage each one — but the human still has to look.
@@ -1268,14 +1433,32 @@ flowchart LR
         <section>
           <span class="section-label">09 · Applications</span>
           <h2>What this unlocks next</h2>
-          <p class="subtitle">The collection pipeline is the foundation. Everything else is a remix.</p>
+          <p class="subtitle">The collection pipeline is the foundation.<br/>Everything else is a remix.</p>
           <aside class="notes">
             Once data flows reliably, every new idea is a small downstream module.
           </aside>
         </section>
         <section>
-          <h3>Adjacencies</h3>
-          <div class="grid-2">
+          <h3>Takeaways</h3>
+          <ul class="clean">
+            <li><strong>Plan first, code second.</strong> CLAUDE.md is your contract with the agent.</li>
+            <li><strong>Split tasks into smaller chunks.</strong> One session per box keeps state clean.</li>
+            <li><strong>Engineering knowledge still matters.</strong> Our background is the edge non-engineers don't have — agents amplify it, they don't replace it.</li>
+            <li><strong>Data is the moat.</strong> Once collection runs, every new feature is days, not months.</li>
+          </ul>
+          <aside class="notes">
+            Four things. Plan with CLAUDE.md; split tasks small so each session has clean state; lean on your engineering background — agents don't make non-engineers into engineers, they make engineers faster; and remember that the data layer is what keeps paying off long after the first ship.
+          </aside>
+        </section>
+        <section class="cta-slide" data-state="cta-collapsed">
+          <div class="cta-hero">
+            <h2>What would <span class="accent">you</span> build with this pattern?</h2>
+            <p class="subtitle">Open for questions.</p>
+            <button type="button" class="cta-button" onclick="document.querySelector('.cta-slide').setAttribute('data-state', 'cta-expanded')">
+              Here are two I'm already prototyping →
+            </button>
+          </div>
+          <div class="cta-cards" aria-hidden="true">
             <div class="card">
               <h4>Finance digest</h4>
               <p>Swap the source list for financial communities + news outlets. Same summarization stack. Output: a markets-focused morning brief.</p>
@@ -1286,27 +1469,7 @@ flowchart LR
             </div>
           </div>
           <aside class="notes">
-            These aren't theoretical. The first is closest to ready — same pipeline, different sources.
-          </aside>
-        </section>
-        <section>
-          <h3>Takeaways</h3>
-          <ul class="clean">
-            <li><strong>Plan first, code second.</strong> CLAUDE.md is your contract with the agent.</li>
-            <li><strong>Split by machine.</strong> One session per box keeps state clean.</li>
-            <li><strong>Split by agent.</strong> Claude Code for ops, Codex for code, no overlap.</li>
-            <li><strong>Trust the loop.</strong> ArgoCD-driven deploys and SSH-driven hotfixes can coexist.</li>
-            <li><strong>Data is the moat.</strong> Once collection runs, every new feature is days, not months.</li>
-          </ul>
-          <aside class="notes">
-            Five things. Plan, split-by-machine, split-by-agent, trust the loop, value the data layer.
-          </aside>
-        </section>
-        <section>
-          <h2>What would <span class="accent">you</span> build with this pattern?</h2>
-          <p class="subtitle">Open for questions.</p>
-          <aside class="notes">
-            Invite the audience to think about their own scratch-your-own-itch project.
+            Invite the audience to think about their own scratch-your-own-itch project. Pause here. Let the question land. If someone in the room has an idea worth surfacing, ask them to share. Then — when you're ready to wrap — click the button. The question floats up, two cards slide in from below: Finance digest (same pipeline, different sources — closest to ready) and Translated video shorts (adds a TTS + video step). These aren't theoretical; both are mid-build. Use them to anchor the closing: the pattern is reusable, the data layer is the moat.
           </aside>
         </section>
       </section>
@@ -1345,7 +1508,7 @@ flowchart LR
             lineColor: '#4a90e2',
             secondaryColor: '#16213e',
             tertiaryColor: '#1a1a2e',
-            fontFamily: 'Inter, sans-serif'
+            fontFamily: "'Avenir Next for Intuit', 'Avenir Next', Avenir, sans-serif"
           }
         });
         const blocks = document.querySelectorAll('.mermaid');
