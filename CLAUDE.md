@@ -1,84 +1,85 @@
 # Overview
-- Claude Code를 이용해 Zero to One을 한 경험을 공유하는 발표 자료를 준비하는 프로젝트
+- A project to prepare a presentation that shares my Zero-to-One experience using Claude Code.
 
 # Goal
-- 15-30분 정도짜리 영어로 된 슬라이드
-  - 15분씩 두번에 나눠서 해도 됨.
+- A 15–30 minute slide deck, in English.
+  - Can be split into two ~15-minute halves.
 
 # Audience
-- Junior - Senior Software engineer including one eng manager
-- Claude code 사용은 대부분 회사 계정을 통해 회사 업무만 했을 것으로 예상
-- 기본적으로 매일 claude code를 사용하고 있음
+- Junior to Senior software engineers, including one engineering manager.
+- Most likely they've only used Claude Code through their company account for company work.
+- They use Claude Code daily as a baseline.
 
-# 주의사항
-- 모든 슬라이드는 영어로 되어 있어야 함
-- 영어로 스크립트도 준비 해야함
-- Sharing learnings, knowledges
-- Do not get distracted by the engineering decisions such as why used this and that, but focus on the progress on building things
+# Ground rules
+- All slides must be in English.
+- The script must also be prepared in English.
+- Focus on sharing learnings and knowledge.
+- Do not get distracted by engineering decisions (why this tool over that one). Stay focused on the *process* of building things.
 
 # Format
-- HTML
-  - Some image files or video will be attached later by me. Keep an placeholder for the media
-- Keep the script aside
-- Keep the text low as possible. But hold more pictures and diagrams
-- 어떤 프레임웤을 써도 괜찮아. 가장 잘 표현할 수 있는 어떤 것이든 써도 좋아. 회사 내부 Github에 올려서 서빙할 예정이라 뭐든 상관 없어
+- HTML.
+  - Some image files or videos will be attached later by me. Keep placeholders for the media.
+- Keep the script aside (separate from the deck itself).
+- Keep the text as low as possible. Lean on pictures and diagrams instead.
+- Any framework is fine — pick whatever expresses the content best. It'll be hosted on the internal company GitHub, so anything reasonable works.
 
-# 내용
+# Content
+
 ## Overview
-- 무엇을 할지 보여줌
-- 어떤 결과물이 필요했는지, 그러기 위해서 뭐가 있어야 했는지, 가지고 있는 인프라가 무엇이 있었는지, 거기서 클로드 코드를 어떻게 활용 했는지
-- 도움이 되었던 경험: 크게 작업을 계획하고, 서버별로 작업을 나눴으며, agent 별로 태스크를 나누어서 겹치지 않게 했다.
+- Show what we're going to do.
+- What outcome was needed, what had to be in place to achieve it, what infrastructure I already had, and how Claude Code was used inside that.
+- What helped most: planning the work at a high level, splitting work by machine, and splitting tasks across agents so they don't overlap.
 
 ## Motivation
-- 밥 먹거나 잠깐 머리 식힐 때 유튜브 쇼츠도 보지만, 요새 어떤 일들이 벌어지고 있는지 궁금해서 그런 글들을 찾아보곤 한다.
-- 커뮤니티가 나뉘어져 있으니, 이곳 저것 찾아보는데 시간도 걸리고 번거로워서 한군데에 몰아두면 좋겠다는 생각을 했다.
-- 데이터를 모아두면, 이걸 가지고 사용할 것들이 생긴다.
+- Over meals or quick breaks I scroll YouTube Shorts, but I also like checking what's going on out there — so I find myself digging through posts.
+- Because communities are scattered, hopping between sites is time-consuming and tedious. I wanted everything in one place.
+- Once you have the data collected, you find new things to do with it.
 
 ## Infra
-- 구성:
-  - Kubernetes가 운용 중인 homelab이 하나 있고, Argo CD도 구성되어 있었음.
-  - Local LLM을 위한 mac-studio가 있다.
-  - Health check을 위해 GCP에 무료로 vm이 하나 떠있다.
-- 모두가 서로에게 접속할 수 있게 하기 위해 VPN으로 연결할 필요가 있었다.
-- 이 부분은 다이어그램으로 개발용 맥북, homelab과 mac-studio는 집 네트워크에, GCP는 외부 네트워크에 표현해주고, 네트워크 연결을 VPN으로 해서 그려줘
-  - 이 다이어그램을 다시 쓸거니까 잘 그려줘. 여기에 claude code와 codex가 SSH로 붙어서 작업하는 것을 이후로 묘사할건데, 컴퓨터 위에 agent가 올라타서 직접 작업하는 모양이면 좋겠어.
+- Setup:
+  - A homelab running Kubernetes, with Argo CD already configured.
+  - A Mac Studio for local LLM inference.
+  - A free-tier VM running on GCP for health checks (and other always-on needs).
+- They all needed to be reachable from each other, so a VPN was required.
+- For this section, draw a diagram: the dev MacBook, the homelab, and the Mac Studio sit in the home network; GCP sits in the external network; everything is connected through a VPN.
+  - The diagram will be reused later — make it good. I'll later overlay Claude Code and Codex attaching to these boxes via SSH; I want the visual to look like an "agent riding on top of the computer" doing the work directly.
 
 ## Architectural design
-- Provided the context in CLAUDE.md about what's needed, what infra I have, what platforms needed, what data stores needed
-- Specified what platform to use: Airflow, Postgres DB, Elastic Search, Frontend page
-- Asked claude code to split the tasks into by machines so that I can expertise the process with multiple sessions
+- Provided the context in CLAUDE.md: what's needed, what infra I have, which platforms are required, which data stores are needed.
+- Specified the platforms to use: Airflow, Postgres, Elasticsearch, a frontend page.
+- Asked Claude Code to split the tasks by machine so I could parallelize the work across multiple sessions.
 
 ## Operations
 - DB
-  - Provided schemas on what to crawl, what to store. Helps claude to understand the crawling codes and DB store schema
-  - Executes the query on DB schema changes, data pruning, and normalization/denormalization
-- Deployments: Synced with github and ArgoCD for automated deployment.
-  - Pushes the code triggers github action, building docker image, pushing them to docker/github registry. ArgoCD synces
-  - But sometimes, agents need to SSH into servers to manually update and deploy
+  - Provided the crawl schema and the storage schema. Helps Claude understand both the crawler code and the DB schema.
+  - Claude executes queries for DB schema changes, data pruning, and normalization/denormalization.
+- Deployments: synced with GitHub and Argo CD for automated deployment.
+  - A code push triggers a GitHub Action, which builds the Docker image and pushes it to the Docker/GitHub registry. Argo CD then syncs.
+  - But sometimes the agents need to SSH into servers to manually update and deploy.
 
 ## Working with multiple agents
-- Claude code and Codex
-  - Claude code: Infrastructures and operations
-  - Codex: Writing codes of airflow dags, frontend app. 처음에는 Claude code가 infra setup을 다 할때까지 기다려야 했다.
-- 여기서, infra diagram을 가지고 애니메이션을 만들면 좋은데:
-  - 개발용 맥북에서 Claude code로 작업을 지시하면, claude code가 SSH로 homelab이나 mac-studio 등 다른 장비에 접속하여 작업하는 것
-  - Codex는 github repo의 코드를 받아서 코드를 수정해서 github으로 푸시하는 것, 그리고 푸시된 코드가 빌드 되어 registry에 저장되면, 그걸 sync 하여 코드가 배포되는 것
+- Claude Code and Codex.
+  - Claude Code: infrastructure and operations.
+  - Codex: writing the Airflow DAGs and the frontend app. Early on, Codex had to wait until Claude Code finished the infra setup.
+- An animation built from the infra diagram would help here:
+  - From the dev MacBook, when I direct Claude Code, it SSHs into other machines like the homelab or Mac Studio to do the work.
+  - Codex pulls the code from the GitHub repo, modifies it, and pushes it back. Once the pushed code is built and stored in the registry, Argo CD syncs it and the new code gets deployed.
 
-## 몇가지 note들
-- 처음에는 동작하지 않는 부분이 많았다.
-  - 서버가 kubernetes에 잘 떴으나, 리소스가 너무 적게 할당되어 있었고, 
-  - ElasticSearch에서 term extraction 옵션을 지정하지 않아서, 제대로 검색되지 않는 문제가 있었고,
-  - airflow DAG들은 병렬처리가 되지 않거나, DAG 구성이 잘못되어 하나라도 실패하면 그 다음이 제대로 동작하지 않거나
-  - 로그가 제대로 찍히지 않거나
-  - 수집이 제대로 되지 않는 등의 문제
-- 커뮤니티 별로 수집 로직을 주지 않고, 주소만 주었는데도 알아서 목록을 잘 파싱하긴 했다.
-  - 시차 문제가 생기기도 해서, 시간 저장 방식, 본문 추출 HTML selector 수정 등의 개선을 했다.
+## A few notes
+- Many things didn't work at first.
+  - Servers came up on Kubernetes fine, but resources were under-allocated.
+  - In Elasticsearch, the term-extraction option wasn't set, so search wasn't working properly.
+  - Airflow DAGs weren't parallelized, or were misconfigured so that a single failure broke the next step.
+  - Logs weren't being captured properly.
+  - Crawls weren't collecting properly, etc.
+- For per-community collection logic, I didn't hand-write parsers — I just gave the URLs and Claude parsed the post lists on its own.
+  - Time-zone issues did come up, so I refined the timestamp storage format, fixed HTML selectors for body extraction, and so on.
 
-## 수집 후
-- Local LLM을 이용해 하루치 요약을 할 수 있게 되었다.
-- 커뮤니티별로 인기 있는 탑10 글들을 모아서 요약하고, 이걸 다시 요약하는 방식으로 전날 있었던 토픽들을 요약해서 텔레그램으로 받도록 했다.
-- 시간을 써서 무슨 일이 있었는지 캐치업 하지 않아도 내가 원하는 도메인들의 내용을 전달 받을 수 있었다.
+## After collection
+- I can now use a local LLM to produce a daily summary.
+- For each community I pull the top-10 most popular posts, summarize them, and then summarize those summaries — so I get yesterday's topics delivered to Telegram.
+- I don't have to spend time catching up to know what happened; the content from the domains I care about comes to me.
 
-## 응용
-- 금융 소식을 받아서 요약 뉴스를 만들 수 있다. 데이터 수집하는게 필요하다.
-- 해외 소식을 번역해서 유투브 영상으로 만들 수 있다.
+## Applications
+- I can ingest financial news to produce a summarized news brief — this needs a data-collection pipeline.
+- I can translate overseas news and turn it into YouTube videos.
