@@ -10,33 +10,33 @@
 
 > Hi everyone. I'm Janghan. Today I want to share a side project I built — a personal aggregator that crawls a bunch of online communities and sends me a morning digest.
 >
-> Before we start, one quick framing note. **This talk is about how I used Claude Code to go from zero to one — the workflow, the prompts, the way work was split across agents and machines. It is *not* a discussion of the engineering decisions inside the project.** I'm not going to debate why Postgres over MongoDB, or Airflow over Prefect, or why two-pass summarization, and so on. Those choices are in the talk, but I'm treating them as given. If you want to dig into any of them, come find me after — happy to chat. For the next 25 minutes, the lens is squarely on *the build process with Claude*, not the architecture itself.
+> Before we start, one quick framing note. **This talk is about how I used Claude Code to go from zero to one — the workflow, the prompts, the way work was split across agents and machines. It is *not* a discussion of the engineering decisions inside the project.** I'm not going to debate Postgres over MongoDB, Airflow over Prefect, two-pass summarization, and so on. Those choices are in the talk, but I'm treating them as given. If you want to dig into any of them, come find me after — happy to chat. For the next 25 minutes, the lens is squarely on *the build process with Claude*, not the architecture itself.
 
 ---
 
 # PART ONE — Design & infrastructure (~14 min)
 
-## 1. Overview (~2 min)
+## 1. Overview (~2.5 min)
 
 ### 1.1 What we're going to build
-> Let me set the destination first. By the end of this talk you'll know what got built, with what pieces I already had, and where Claude Code actually fit in. We'll move through motivation, infra, the design phase, ops, the agent split, and lessons. There's an outcome section and an "applications" section at the end.
+> Let me set the destination first. By the end you'll know what got built, with what pieces I already had, and where Claude Code actually fit in. We move through motivation, infra, the design phase, ops, the agent split, and lessons. There's an outcome section and an "applications" section at the end.
 
 ### 1.2 What did I need?
-> Three things I wanted. Collect posts from multiple online communities on a schedule. Store them somewhere I can list and search. Summarize them and deliver a digest to my phone. Notice these are *outcomes* — not engineering choices. Keeping the outcome separate from the implementation made the conversation with Claude Code much cleaner.
+> Three things I wanted. Collect posts from multiple online communities on a schedule. Store them somewhere I can list and search. Summarize them and deliver a digest to my phone. Notice these are *outcomes* — not engineering choices. Keeping outcome separate from implementation made the conversation with Claude Code much cleaner.
 
 ### 1.3 What I already had
-> I didn't start from zero on infra. I had a homelab running Kubernetes with Argo CD already syncing from GitHub. I had a Mac Studio that was mostly idle, perfect for local LLM inference. I had a free-tier GCP VM that's always on. And of course Claude Code — and a willingness to actually let it drive.
+> I didn't start from zero on infra. I had a homelab running Kubernetes with Argo CD already syncing. I had a Mac Studio that was mostly idle — perfect for local LLM inference. I had a free-tier GCP VM that's always on with a public IP, so it's the natural home for anything that needs to be reachable from outside the home network. And of course Claude Code *and* Codex — two coding agents, and a willingness to let them drive.
 
 ### 1.4 What helped most
-> If you remember only one slide from this talk, make it this one. Four things made the difference.
+> If you remember only one slide from this talk, make it this one. Four things made the difference. The top row is the conceptual pair — *how to think*. The bottom row is the concrete mechanics — *how to execute*.
 >
-> First — plan big, then split into *agent-shaped* tasks. The trick isn't that you plan; it's *how* you slice. Each task should end up being either an operation, or a piece of code — never both at once. That keeps each agent's purpose unambiguous, and it's also how I dodged content rot as the project grew.
+> **One — plan big, then split into agent-shaped tasks.** The trick isn't that you plan; it's *how* you slice. Each task should end up being either an operation, or a piece of code — never both at once. That keeps each agent's purpose unambiguous, and it's how I dodged content rot as the project grew.
 >
-> Second — split by machine. Same principle, applied to hardware. One session per box keeps state local. Decisions for the homelab don't pollute decisions for the Mac Studio.
+> **Two — ship the bare minimum first, then iterate.** This is the humility one. My v1 goal, literally, was "works enough that I could demo this from a United flight." Wi-fi flaky, no help from anyone. It mostly *didn't* work that first version. But every refinement after was driven by a real failure I'd seen — not by speculating about what might go wrong.
 >
-> Third — split by agent *type*. Ops tasks go to Claude Code, because it lives in the terminal. Code tasks go to Codex, because it lives in the repo workflow. Right tool, right lane.
+> **Three — split by machine.** One session per box keeps state local. Decisions for the homelab don't pollute decisions for the Mac Studio.
 >
-> Fourth — and this is the humility one — ship the bare minimum first, then iterate. My v1 goal, literally, was "works enough that I could demo this from a United flight." Wi-fi flaky, no help from anyone. It mostly *didn't* work that first version. But every refinement after was driven by a real failure I'd seen — not by speculating about what might go wrong. That's the loop that kept things moving.
+> **Four — split by agent type.** Ops tasks go to Claude Code, because it lives in the terminal. Code tasks go to Codex, because it lives in the repo workflow. Right tool, right lane.
 
 ## 2. Motivation (~2 min)
 
@@ -61,12 +61,12 @@
 > Each box has exactly one job. Homelab is compute. Mac Studio is inference. GCP is the always-reachable foothold from the outside world. Separating responsibilities by hardware made it much easier to reason about state.
 
 ### 3.3 How they're connected
-> [Walk through the diagram.] On the left, my home network — the MacBook, the homelab, the Mac Studio. On the right, external — the GCP VM. They're all stitched together by Tailscale in the middle. Notice the little agents riding on top of each box. That's the visual: the agent is the thing actually doing work *on* the box. The MacBook is where Claude Code lives, and from there it SSHs into any machine as if it were local.
+> [Walk through the diagram.] On the left, my home network — the MacBook, the homelab, the Mac Studio. On the right, external — the GCP VM. They're all stitched together by Tailscale in the middle. Notice the little agents riding on top of each box. That's the visual — the agent is the thing actually doing work *on* the box. The MacBook is where Claude Code and Codex live, and from there they reach any machine as if it were local.
 
 ### 3.4 Why the VPN matters
-> Without a flat addressable network, multi-machine agent work is painful. The VPN is what makes "one agent, many machines" actually work. One SSH config, every node reachable, no public exposure of homelab services. This was load-bearing for the whole project.
+> Without a flat addressable network, multi-machine agent work is painful. Tailscale is what makes "one agent, many machines" actually work. One SSH config, every node reachable, no public exposure of homelab services. This was load-bearing for the whole project.
 
-## 4. Architectural Design (~4 min)
+## 4. Architectural Design (~4.5 min)
 
 ### 4.1 From idea to design doc
 > Before any code, I wrote out the context in a CLAUDE.md file. Same pattern this very talk is built with, by the way — these slides were also bootstrapped from a CLAUDE.md.
@@ -75,7 +75,7 @@
 > Four things. The goal — collect, store, search, summarize, notify. The inventory — the hardware I just showed. The platform picks — Airflow, Postgres, Elasticsearch, a small web frontend. And constraints — stay on existing infra, no paid SaaS. Notice: I picked the platforms. I didn't ask Claude what to use. That's where you waste hours debating. Hand it the bag of tools and say "design for these."
 
 ### 4.3 The system, end-to-end
-> [Walk diagram.] Two flavors of Airflow DAG run on the homelab. The crawler DAGs pull from each community and land rows in Postgres. From Postgres they're indexed into Elasticsearch. The frontend lives on the GCP VM — it reads Postgres directly for the listings, and hits Elasticsearch for the search feature. A separate digest DAG pulls yesterday's window from Postgres, calls the local LLM on the Mac Studio for NSFW classification and summarization, and pushes the result to Telegram — all from within the same DAG. The Mac Studio is just an inference endpoint here, not an orchestrator.
+> [Walk diagram.] Two flavors of Airflow DAG run on the homelab. The crawler DAGs pull from each community and land rows in Postgres. From Postgres they're indexed into Elasticsearch. The frontend lives on the GCP VM — it reads Postgres directly for the listings, and hits Elasticsearch for the search feature. A separate digest DAG pulls yesterday's window from Postgres, calls the local LLM on the Mac Studio for NSFW classification *and* summarization, and pushes the result to Telegram — all from within the same DAG. The Mac Studio is just an inference endpoint here, not an orchestrator.
 
 ### 4.4 The split that unblocked me
 > Here's the prompt that changed everything: "split this plan by machine, so I can run sessions in parallel." Suddenly I had a homelab session, a Mac Studio session, and a GCP session — each with its own scope, its own context, its own todo list. The token budget thanks you. Your sanity thanks you. And the sessions can actually run in parallel.
@@ -87,7 +87,7 @@
 >
 > Each session only loads its own slice. The homelab session never sees the nginx config. The Mac Studio session never sees Argo CD. The GCP session never sees the data schema.
 >
-> Three concrete benefits. Faster context — no irrelevant tokens taking up space. Less content rot — changes to the master don't accidentally regenerate stale assumptions in the per-machine files until I explicitly ask. And clearer accountability — when something goes wrong, I know exactly which file the agent was reading from.
+> Three concrete benefits. Faster context — no irrelevant tokens. Less content rot — changes to the master don't accidentally regenerate stale assumptions in the per-machine files until I explicitly ask. And clearer accountability — when something goes wrong, I know exactly which file the agent was reading from.
 
 ## 5. Operations (~3 min)
 
@@ -95,13 +95,13 @@
 > Design is a one-off. Ops is forever. This is where Claude Code stopped being a code generator and became an actual operator.
 
 ### 5.2 Database work
-> The schema lives in CLAUDE.md. Migrations are generated by Claude, I review, they run against Postgres. Pruning, normalization, dedupe — all just queries Claude writes and I approve. Big win: crawl code and query code stayed in sync because both were generated from the same documented schema.
+> [Point at the snippet.] This is the entire data-model section in CLAUDE.md. Notice what's *not* there — I didn't write a single line of SQL. I just listed the fields I needed: title, URL, community, a cross-community global_id, fetched timestamp, vote counts, summary, is_nsfw, and a couple of null-until-filled-later columns. Claude picked the column types, picked sensible indexes, and dropped a migration into `db/migrations/` on its own. The point of putting this in CLAUDE.md isn't to hand-craft the schema — it's to give every future session the same starting context, so the crawler code and the query code never drift apart. When I need a new field later, I add a line to the list and ask for another migration.
 
 ### 5.3 Deployments — the happy path
-> [Walk diagram.] This is a GitOps loop, and the two-repo structure matters. The app code lives in one repo. The Kubernetes manifests live in a *separate* repo. When I push to the app repo, GitHub Actions builds the image and does two things — pushes the image to the registry, and commits the new image tag back into the manifest repo. Argo CD is only watching the manifest repo; it doesn't poll the registry. It sees the new commit, syncs the cluster, the pod rolls. The cluster's desired state always lives in Git, which means re-syncs, rollbacks, and audits are just git operations.
+> [Walk diagram.] This is a GitOps loop, and the two-repo structure matters. The app code lives in one repo. The Kubernetes manifests live in a *separate* repo. When I push to the app repo, GitHub Actions builds the image and does two things — pushes the image to the registry, *and* commits the new image tag back into the manifest repo. Argo CD is only watching the manifest repo; it doesn't poll the registry. It sees the new commit, syncs the cluster, the pod rolls. The cluster's desired state always lives in Git, which means re-syncs, rollbacks, and audits are just git operations.
 
 ### 5.4 The other path — SSH
-> Not everything fits the Git-driven loop. Sometimes I need to bump a stuck pod's resources, run a one-off DB hotfix, swap an LLM model on the Mac Studio, or tweak nginx on the GCP VM. Claude Code with SSH access is, honestly, the cleanest on-call experience I've had. Because of the VPN, every machine is one hop away.
+> Not everything fits the Git-driven loop. Sometimes I need to bump a stuck pod's resources, run a one-off DB hotfix, swap an LLM model on the Mac Studio, or tweak nginx on the GCP VM. Claude Code with SSH access is, honestly, the cleanest on-call experience I've had. Because of Tailscale, every machine is one hop away.
 
 ---
 
@@ -111,7 +111,7 @@
 
 # PART TWO — Multi-agent workflow & outcomes (~13 min)
 
-## 6. Multi-Agent (~4 min)
+## 6. Multi-Agent (~4.5 min)
 
 ### 6.1 Two agents, different jobs
 > This is the part of the talk I find most fun. I had two coding agents working at the same time, and the trick was giving them different jobs.
@@ -120,16 +120,45 @@
 > Claude Code did infrastructure and ops. SSH into machines, edit manifests, run kubectl, patch DAGs in place, debug pods. Codex did application code. Airflow DAG implementations, the frontend app, pure-code repos, PRs into GitHub. Early on Codex had to wait — Claude needed to set the infra up first. But once the foundation was there, both ran in parallel.
 
 ### 6.3 What it looks like in motion
-> [Walk the animated diagram.] Step one — Claude Code SSHs from the MacBook into the homelab or the Mac Studio for ops work. Step two — in parallel, Codex pushes to the app repo. Step three — Actions builds the image and pushes it to the registry. Step four — the same Action commits a tag bump into the manifest repo. That's the GitOps trigger. Step five — Argo CD is only watching the manifest repo; it sees the new commit. Step six — the cluster reconciles, pod rolls. The MacBook is the orchestrator. I'm just routing tasks between the two agents.
+> [Walk the animated diagram. Six steps.]
+>
+> Step one — Claude Code SSHs from the MacBook into the homelab or the Mac Studio for ops work.
+>
+> Step two — in parallel, Codex pushes to the app repo.
+>
+> Step three — Actions builds the image and pushes it to the registry.
+>
+> Step four — the same Action commits a tag bump into the *manifest* repo. That's the GitOps trigger.
+>
+> Step five — Argo CD is only watching the manifest repo. It sees the new commit.
+>
+> Step six — the cluster reconciles, pod rolls.
+>
+> The MacBook is the orchestrator. I'm just routing tasks between the two agents.
 
-### 6.4 Why the split worked — and where it bites
-> Let me do this honestly, because it's not free.
+### 6.4a Why the split worked (upsides slide)
+> Five reasons the lane split paid off.
 >
-> Upsides first. No collision — they touch different layers, never the same file. Right tool for the layer — Claude lives in the terminal, Codex lives in the repo workflow. Easier review — Codex's diffs hit GitHub, Claude's changes hit the cluster. Recoverable — Argo CD is the truth, so if anything drifts, I just re-sync. And one practical one — token budget. Daily and weekly rate limits hit half as fast when two providers share the load.
+> *No collision* — different layers, never the same file.
 >
-> Downsides. Two of them. First — if you accidentally let both agents touch the same area, you get conflicts. Either a git merge conflict, or worse, drift between what each agent *thinks* the world looks like. Second — they don't share memory. Each agent's notes and memory live in its own session. If Claude just patched a deployment, Codex has no idea unless it goes and looks.
+> *Right tool for the layer* — Claude lives in the terminal, Codex lives in the repo workflow.
 >
-> The mitigation is the same in both cases: don't trust either agent's mental model. Have it re-read the source of truth — the code repo, the live cluster, the actual state — at the start of any non-trivial change.
+> *Easier review* — Codex's diffs hit GitHub where review is easy; Claude's changes hit the cluster where Argo can compare against desired state.
+>
+> *Recoverable* — Argo CD is the truth. If anything drifts, I just re-sync.
+>
+> And one practical one most people don't expect — *token budget spread*. Daily and weekly rate limits hit half as fast when two providers share the load. If everything goes through one agent, you cap out mid-task and you're stuck. Splitting across Claude Code and Codex roughly doubles your runway.
+
+### 6.4b …and where it bites (downsides slide)
+> Now the downsides, because the split isn't free. Two of them.
+>
+> *Overlap = conflict.* If you accidentally let both agents touch the same file or the same cluster object, you get conflicts: either a git merge conflict, or worse, drift between what each agent *thinks* the world looks like.
+>
+> *No shared memory.* Each agent's notes live in its own session. If Claude just patched a deployment, Codex has no idea unless it goes and looks.
+>
+> *The mitigation is the same in both cases:* don't trust either agent's mental model. Have it re-read the source of truth — the code repo, the live cluster, the actual state — at the start of any non-trivial change.
+>
+> Land the callout: **two specialized agents beat one generalist — *as long as you keep their lanes from crossing***. The "as long as" matters. Without that discipline, the split actively hurts.
 
 ## 7. Hiccups & Lessons (~3 min)
 
@@ -137,23 +166,45 @@
 > Honest section. This is not a "prompted once and shipped" story.
 
 ### 7.2 What broke early on
-> Four real failures. Kubernetes pods came up but were under-provisioned — OOMs and throttling. Elasticsearch was missing a term-extraction option, so a chunk of my docs were invisible to queries. Airflow DAGs weren't parallelized, so one community failing cascaded into the next day's run. And crawls were silent — no logs, so failed collections looked like empty days. None of these were surprising in hindsight. They were just invisible until I looked. Claude helped triage each one — but the human still has to *look*.
+> Four real failures, and they cluster nicely on a 2x2.
+>
+> *K8s under-provisioned* — pods came up but resources were too tight. OOMs and throttling.
+>
+> *Silent crawls* — logs missing, so failed collections looked like empty days.
+>
+> *Elasticsearch misses* — term extraction option wasn't set, so a chunk of my docs were invisible to queries.
+>
+> *Airflow DAG fragility* — no parallelism, so one community failing cascaded into the next day's run.
+>
+> None of these were surprising in hindsight. They were just invisible until I looked. Claude helped triage each one — but the human still has to *look*.
 
 ### 7.3 What worked surprisingly well
-> Five wins, and the last three were genuine surprises.
+> Five wins. Top row was the original surprise; bottom row is where Claude exceeded my expectations on the ops side.
 >
 > *Generic crawlers* — I gave Claude only the URLs. It figured out list parsing for each community on its own, without per-site code.
 >
-> *Schema-driven prompts* — once the DB schema lived in CLAUDE.md, the crawler code and the query code stopped drifting apart.
+> *Schema-driven prompts* — once the schema was documented in CLAUDE.md, the crawler code and the query code stopped drifting apart.
 >
-> *Recovers broken systems* — one of the homelab nodes rebooted on its own. Claude couldn't tell me *why* the host went down — that's out of its reach. But it noticed a Postgres data disk failed to remount, edited /etc/fstab, brought the mount back, restarted Postgres. End-to-end recovery without me touching the keyboard.
+> *Recovers broken systems* — one of the homelab nodes rebooted on its own. Claude couldn't tell me *why* the host went down — that's out of its reach. But it noticed a Postgres data disk failed to remount, edited `/etc/fstab`, brought the mount back, restarted Postgres. End-to-end recovery without me touching the keyboard.
 >
 > *Handles gnarly K8s commands and manifests* — the long kubectl incantations, the fiddly manifest fields like hostPath mounts, GPU mounts, secrets. These are the parts I always have to look up. Claude just does them.
 >
-> *Reads error logs and patches the code* — on a failure, it tails the logs, isolates the offending stack frame, and edits the code directly. No need to translate the failure into a prompt.
+> *Reads error logs and patches the code* — on a failure, it tails the logs, isolates the offending stack frame, and edits the code directly. No need for me to translate the failure into a prompt.
 
 ### 7.4 Refinements that mattered
-> Timestamp normalization — store UTC, render local. Selector tuning — extract body, not chrome. DAG isolation — one community fails, the rest keep running. Right-sizing resources by observing actual usage. And UI polish — search bar wired up to Elasticsearch, dark mode, filters by community and tag. Each one was a 30-minute conversation, not a 3-day project. That's the speed multiplier you get from this workflow.
+> Five small refinements that compounded.
+>
+> *Timestamp normalization* — store UTC, render local.
+>
+> *HTML selector tuning* — extract body, not chrome or ads.
+>
+> *DAG isolation* — one community fails, the rest keep running.
+>
+> *Resource right-sizing* — observe actual usage, then bump.
+>
+> *UI polish* — the backend got steady, so I layered on quality-of-life features: a search bar wired to Elasticsearch, dark mode, filters by community and tag.
+>
+> Each one was a 30-minute conversation, not a 3-day project. That's the speed multiplier you get from this workflow.
 
 ## 8. Outcome (~3 min)
 
@@ -170,61 +221,72 @@
 > The lesson here: the local LLM stopped being a "summarizer." It became a generic inference endpoint I could keep adding tasks to.
 
 ### 8.3 What lands on my phone
-> One Telegram message in the morning. Top topics across my chosen communities, with links if I want to dive deeper. No catch-up scrolling, no FOMO. I'll show you a real screenshot here on the actual demo day.
+> [Point at the screenshot.] This is an actual morning digest. The header is the date. Then the day's headlines as bullets — usually five to eight across all communities. Below that, per-community highlights. The whole thing fits on one screen, no scrolling needed. If a topic is interesting, I tap through to the original post. The point isn't that the digest is comprehensive — it's that it's enough to decide whether to dig in.
 
 ### 8.4 What changed for me
 > Four things.
 >
-> Time — no more 20-minute lunch-hour scroll.
+> *Time* — no more 20-minute lunch-hour scroll.
 >
-> Coverage — I see more communities than I used to visit manually.
+> *Coverage* — I see more communities than I used to visit manually.
 >
-> Signal — pre-ranked by what humans found engaging, not by an algorithmic feed.
+> *Signal* — pre-ranked by what humans found engaging, not by an algorithmic feed.
 >
-> And one that changed how I read the web. Discovery via digest. I don't dig through whole threads anymore. The Telegram digest surfaces the popular posts, and I only follow the ones that look worth my time. The model flipped — from hunting, to triaging a curated list.
+> And one that changed how I read the web. *Discovery via digest.* I don't dig through whole threads anymore. The Telegram digest surfaces the popular posts, and I only follow the ones that look worth my time. The model flipped — from hunting, to triaging a curated list.
 
-## 9. Applications (~2 min)
+## 9. Closing (~2 min)
 
 ### 9.1 What this unlocks next
 > The collection pipeline is the foundation. Everything else is a remix.
 
-### 9.2 Adjacencies
-> Two examples. A finance digest — swap the source list for financial communities and news outlets, reuse the entire stack. And translated video shorts — pull foreign-language stories, translate, generate narration, stitch into short videos. Same upstream pipeline, new downstream module.
+### 9.2 Takeaways
+> Four things to remember.
+>
+> *Plan first, code second.* CLAUDE.md is your contract with the agent.
+>
+> *Split tasks into smaller chunks.* One session per box keeps state clean.
+>
+> *Engineering knowledge still matters.* Our background is the edge non-engineers don't have — agents amplify it, they don't replace it.
+>
+> *Data is the moat.* Once collection runs, every new feature is days, not months.
 
-### 9.3 Takeaways
-> Five things to remember.
+### 9.3 Closing — interactive CTA
+> [Question slide. Read it out, then *pause*.]
 >
-> Plan first, code second — CLAUDE.md is your contract with the agent.
+> "What would *you* build with this pattern?"
 >
-> Split by machine — one session per box keeps state clean.
+> Let the question land. Don't rush past it. If someone in the room has an idea worth surfacing, ask them to share it.
 >
-> Split by agent — Claude Code for ops, Codex for code.
+> When you're ready to wrap, **click the button on the slide** (not the arrow key — the arrow advances to "Thank you"). The question floats up, two cards slide in from below.
 >
-> Trust the loop — Argo CD deploys and SSH hotfixes can coexist.
+> *Finance digest* — swap the source list for financial communities and news outlets, reuse the entire summarization stack.
 >
-> Value the data layer — once collection runs, every new feature is days, not months.
-
-### 9.4 Closing
-> What would *you* build with this pattern? The Kubernetes piece is optional. The agent-split is the durable part. Thanks — happy to take questions.
+> *Translated video shorts* — pull foreign-language stories, translate, summarize, generate narration, stitch into short videos.
+>
+> Both are mid-build, not theoretical. Anchor the closing: the pattern is reusable. The data layer is the moat. Then click forward to the Thank you slide.
 
 ---
 
 ## Timing buffer & cuts
 
-- If running long: skip 9.1 and merge 9.2 directly into 9.3.
-- If *really* long: cut 2.4 — the realization re-lands at the start of §9.
+- If running long: cut 2.4 — the realization re-lands at the start of §8.4.
+- If *really* long: collapse §6.4a + §6.4b into a single mention ("upsides clear, downsides are overlap and no shared memory, mitigation is re-read the source of truth").
 - If audience is junior-heavy: spend longer on the animated diagram in §6.3 — that's the conceptual core.
-- If audience is senior-heavy: spend longer on §4.5 (CLAUDE.md fan-out) and §6.4 (downsides) — those land hardest with experienced engineers.
+- If audience is senior-heavy: spend longer on §4.5 (CLAUDE.md fan-out) and §6.4b (downsides + mitigation) — those land hardest with experienced engineers.
 
 ## Demo backup (if there's time)
 
 - Live Telegram message from this morning.
 - Live frontend (the search UI over Elasticsearch on the GCP VM).
-- A `kubectl get pods` from a Claude Code session — to show ops in action.
+- A `kubectl get pods` from a Claude Code session — show ops in action.
 - `cat examples/master-CLAUDE.md` followed by one of the derived files — make the fan-out concrete.
 
 ## Numbers to mention if anyone asks
 
 - ~4 machines, 1 tailnet, ~6 weeks from idea to first Telegram message.
-- ~20 minutes per refinement on average — the iteration loop is the win.
+- ~30 minutes per refinement on average — the iteration loop is the win.
 - Free GCP tier is enough for the frontend; everything else is hardware I already owned.
+
+## Closing-CTA reminder
+
+⚠️ On the final "What would you build" slide, **use the mouse / trackpad to click the button**, not the arrow key. The arrow advances to "Thank you" without revealing the two adjacency cards.
