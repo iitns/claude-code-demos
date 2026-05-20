@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Zero to One with Claude Code</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" id="theme" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css" />
+
+  <style>
+    /* === Zero to One with Claude Code — custom theme === */
+    :root {
+      --bg-deep: #0e1320;
+      --bg-mid: #16213e;
+      --accent: #4a90e2;
+      --accent-warm: #f5a623;
+      --accent-success: #7ed321;
+      --text: #e8eef7;
+      --muted: #8a99b3;
+      --code-bg: #0b1020;
+      --border: rgba(255, 255, 255, 0.08);
+    }
+
+    .reveal {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--text);
+    }
+    .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      text-transform: none;
+      color: var(--text);
+    }
+    .reveal h1 { font-size: 3.2em; line-height: 1.1; }
+    .reveal h2 { font-size: 2.2em; line-height: 1.15; }
+    .reveal h3 { font-size: 1.5em; color: var(--accent); }
+
+    .title-main { font-size: 3.6em; line-height: 1.05; margin-bottom: 0.4em; }
+
+    .accent { color: var(--accent); }
+    .accent-warm { color: var(--accent-warm); }
+    .accent-success { color: var(--accent-success); }
+    .muted { color: var(--muted); }
+
+    .subtitle { font-size: 1.2em; color: var(--muted); margin-bottom: 1.5em; }
+    .meta { font-size: 0.85em; color: var(--muted); letter-spacing: 0.08em; }
+    .meta span + span::before { content: ' · '; margin: 0 0.4em; }
+
+    .section-label {
+      display: inline-block; font-size: 0.7em; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 0.3em 0.8em; border-radius: 999px; margin-bottom: 1em;
+    }
+
+    .media-placeholder {
+      border: 2px dashed var(--accent); border-radius: 12px;
+      padding: 2em; background: rgba(74, 144, 226, 0.06); color: var(--muted);
+      font-size: 0.8em; text-align: center; margin: 1em auto;
+      min-height: 240px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 0.5em;
+    }
+    .media-placeholder .icon { font-size: 2em; opacity: 0.6; }
+    .media-placeholder .label { font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2em; align-items: center; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5em; }
+    .col-stack > * + * { margin-top: 0.8em; }
+
+    .card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 1.2em 1.4em; text-align: left;
+    }
+    .card h4 { margin: 0 0 0.4em; color: var(--accent); font-size: 1em; }
+    .card p { margin: 0; font-size: 0.78em; color: var(--text); line-height: 1.5; }
+    .card.warm h4 { color: var(--accent-warm); }
+    .card.success h4 { color: var(--accent-success); }
+
+    .pill {
+      display: inline-block; font-size: 0.7em;
+      padding: 0.25em 0.7em; border-radius: 999px;
+      background: rgba(74, 144, 226, 0.15); color: var(--accent);
+      border: 1px solid rgba(74, 144, 226, 0.4);
+      margin: 0.2em 0.2em; letter-spacing: 0.05em;
+    }
+    .pill.warm { background: rgba(245, 166, 35, 0.15); color: var(--accent-warm); border-color: rgba(245, 166, 35, 0.4); }
+    .pill.success { background: rgba(126, 211, 33, 0.15); color: var(--accent-success); border-color: rgba(126, 211, 33, 0.4); }
+
+    .reveal ul.clean { list-style: none; padding: 0; }
+    .reveal ul.clean li {
+      padding: 0.4em 0; border-bottom: 1px solid var(--border); font-size: 0.85em;
+    }
+    .reveal ul.clean li:last-child { border-bottom: none; }
+    .reveal ul.clean li::before { content: '→ '; color: var(--accent); font-weight: bold; margin-right: 0.4em; }
+
+    .diagram-wrap { width: 100%; max-width: 1100px; margin: 0 auto; }
+    .diagram-wrap svg { width: 100%; height: auto; }
+
+    .reveal pre { font-size: 0.55em; width: 100%; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); }
+    .reveal pre code { border-radius: 8px; padding: 1em 1.2em; max-height: 500px; }
+
+    .callout {
+      border-left: 4px solid var(--accent);
+      padding: 0.6em 1.2em; background: rgba(74, 144, 226, 0.08);
+      font-style: italic; color: var(--muted); text-align: left; margin: 1em 0;
+    }
+
+    .mermaid { background: transparent !important; }
+    .mermaid svg { max-height: 520px; }
+
+    /* Fan-out slide: master CLAUDE.md → per-machine files */
+    .fanout-slide h3 { margin-bottom: 0.3em; }
+    .fanout-diagram { max-width: 1100px; margin: 0 auto; }
+    .fanout-diagram svg { width: 100%; height: auto; max-height: 200px; }
+    .fanout-snippets {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.7em;
+      margin-top: 0.8em;
+    }
+    .fanout-snippets .snippet {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .fanout-snippets .snippet-title {
+      padding: 0.35em 0.7em;
+      font-size: 0.45em;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(74, 144, 226, 0.08);
+      border-bottom: 1px solid var(--border);
+    }
+    .fanout-snippets .snippet-title .muted { color: var(--muted); font-weight: 400; }
+    .fanout-snippets pre.snippet-code {
+      margin: 0;
+      box-shadow: none;
+      width: 100%;
+    }
+    .fanout-snippets pre.snippet-code code {
+      background: #0b1020;
+      font-size: 0.38em;
+      line-height: 1.35;
+      padding: 0.6em 0.7em;
+      max-height: 200px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      border-radius: 0;
+    }
+
+    /* Screenshot figure (replaces media-placeholder when a real image is in) */
+    .reveal figure.shot {
+      margin: 0;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #0e1320;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    .reveal figure.shot img {
+      display: block;
+      width: 100%;
+      max-height: 420px;
+      object-fit: cover;
+      object-position: top center;
+      border-radius: 10px 10px 0 0;
+    }
+    .reveal figure.shot figcaption {
+      padding: 0.5em 0.8em;
+      font-size: 0.55em;
+      color: var(--muted);
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+
+    /* Compact-cards: equal-sized cards in a tight 2x2 grid (e.g. "What helped most") */
+    .compact-cards .grid-2 {
+      grid-auto-rows: 1fr;
+      gap: 1em;
+    }
+    .compact-cards .card {
+      padding: 0.7em 0.9em;
+    }
+    .compact-cards .card h4 {
+      font-size: 0.78em;
+      margin-bottom: 0.3em;
+      line-height: 1.25;
+    }
+    .compact-cards .card p {
+      font-size: 0.6em;
+      line-height: 1.45;
+    }
+    .compact-cards h3 {
+      margin-bottom: 0.5em;
+    }
+    /* Tight variant: ~5 cards in 2-2-1 — squeeze vertical rhythm further */
+    .compact-cards.tight .grid-2 {
+      gap: 0.55em;
+    }
+    .compact-cards.tight .card {
+      padding: 0.5em 0.8em;
+    }
+    .compact-cards.tight .card h4 {
+      font-size: 0.72em;
+      margin-bottom: 0.2em;
+    }
+    .compact-cards.tight .card p {
+      font-size: 0.55em;
+      line-height: 1.35;
+    }
+    .compact-cards.tight h3 {
+      margin-bottom: 0.3em;
+    }
+    .compact-cards.tight .callout {
+      margin-top: 0.5em;
+      padding: 0.35em 1em;
+      font-size: 0.85em;
+    }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- ============ Title ============ -->
+      <section data-background-gradient="linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)">
+        <h1 class="title-main">Zero to One<br/><span class="accent">with Claude Code</span></h1>
+        <p class="subtitle">Building a personal content aggregator across a homelab, a Mac Studio, and the cloud</p>
+        <p class="meta"><span>Janghan Park</span> · <span>Intuit</span></p>
+        <aside class="notes">
+          Opening. Introduce yourself briefly. Frame the talk: a real story of going from idea to running system, using Claude Code as the primary collaborator. 15-30 min, can split into two 15-min halves.
+        </aside>
+      </section>
+
+      <!-- ============ 1. Overview ============ -->
+      <section>
+        <section>
+          <span class="section-label">01 · Overview</span>
+          <h2>What we're going to build</h2>
+          <p class="subtitle">A personal aggregator that watches the web for me — and tells me what mattered.</p>
+          <aside class="notes">
+            Set the destination first. By the end you should know what got built, with what pieces, and where Claude Code fit in. We'll go through motivation, infra, design, ops, and lessons.
+          </aside>
+        </section>
+        <section>
+          <h3>What did I need?</h3>
+          <div class="grid-3">
+            <div class="card"><h4>Collect</h4><p>Pull posts from multiple online communities on a schedule.</p></div>
+            <div class="card"><h4>Store &amp; search</h4><p>Keep them queryable — by topic, by community, by date.</p></div>
+            <div class="card"><h4>Summarize &amp; deliver</h4><p>Daily digest of what mattered, sent to my phone.</p></div>
+          </div>
+          <aside class="notes">
+            Three things I wanted. Notice these aren't engineering choices yet — these are the user-facing outcomes.
+          </aside>
+        </section>
+        <section>
+          <h3>What I already had</h3>
+          <ul class="clean">
+            <li><strong>Homelab</strong> — Kubernetes cluster + Argo CD wired up</li>
+            <li><strong>Mac Studio</strong> — sitting there waiting to run local LLMs</li>
+            <li><strong>Free GCP VM</strong> — small but always-on, good for health checks</li>
+            <li><strong>Claude Code</strong> — and a willingness to let it drive</li>
+          </ul>
+          <aside class="notes">
+            I didn't start from zero on infra. The interesting part is how Claude Code stitched these existing pieces into something coherent.
+          </aside>
+        </section>
+        <section class="compact-cards">
+          <h3>What helped most</h3>
+          <div class="grid-2">
+            <div class="card success">
+              <h4>1 · Plan big, then split into agent-shaped tasks</h4>
+              <p>Tasks become either an <em>operation</em> or a piece of <em>code</em> — never both. Each chunk fits one agent's job. Keeps purpose unambiguous and dodges content rot as the project grows.</p>
+            </div>
+            <div class="card success">
+              <h4>2 · Split by machine</h4>
+              <p>Same principle, applied to hardware. One session per box keeps state local and ops decisions scoped.</p>
+            </div>
+            <div class="card success">
+              <h4>3 · Split by agent type</h4>
+              <p>Ops tasks → Claude Code (terminal, SSH, kubectl). Code tasks → Codex (repo, PRs). Right tool, right lane.</p>
+            </div>
+            <div class="card success">
+              <h4>4 · Ship the bare minimum first, then iterate</h4>
+              <p>Goal v1: <em>"works enough that I could demo it from a United flight."</em> It mostly didn't — so every refinement after was driven by a real failure, not speculation.</p>
+            </div>
+          </div>
+          <aside class="notes">
+            Four things that paid off the most. Notice the pattern: three of them are about *splitting* — by purpose, by machine, by agent type. Splitting keeps each agent's context narrow and prevents content rot. The fourth is about humility: get something barely working first, then let real failures drive every next change. If you remember one slide from this talk, it's this one.
+          </aside>
+        </section>
+      </section>
+
+      <!-- ============ 2. Motivation ============ -->
+      <section>
+        <section>
+          <span class="section-label">02 · Motivation</span>
+          <h2>Why I built this</h2>
+          <aside class="notes">
+            A quick personal motivation. This isn't a work project — it's a "scratch my own itch" project. That matters because it gave me freedom to experiment.
+          </aside>
+        </section>
+        <section>
+          <div class="grid-2">
+            <div>
+              <h3>The everyday scene</h3>
+              <p class="muted">Lunch break. Coffee. Phone in hand.</p>
+              <ul class="clean">
+                <li>YouTube Shorts to decompress</li>
+                <li>But also — what's <em>actually</em> happening today?</li>
+                <li>Tech, finance, hobbies — all in different places</li>
+              </ul>
+            </div>
+            <figure class="shot">
+              <img src="assets/images/beobe-home.png" alt="Screenshot of the beobe aggregator home page showing a list of recent posts from multiple communities" />
+              <figcaption>The aggregator's home view — posts from every community in one stream.</figcaption>
+            </figure>
+          </div>
+          <aside class="notes">
+            I'd find myself bouncing between five or six communities just to feel caught up. Each visit is friction.
+          </aside>
+        </section>
+        <section>
+          <h3>The frustration</h3>
+          <div class="grid-2">
+            <div class="card warm"><h4>Fragmented</h4><p>Every community lives somewhere different. No single place to glance at.</p></div>
+            <div class="card warm"><h4>Time-expensive</h4><p>Hunting through threads to find the few that actually mattered.</p></div>
+          </div>
+          <p class="callout">"If I just had everything in one place, I could decide what's worth my attention."</p>
+          <aside class="notes">
+            The core insight wasn't "I need an AI" — it was "I need consolidation." AI came later, when I realized the consolidated data was a goldmine.
+          </aside>
+        </section>
+        <section>
+          <h3>The bonus realization</h3>
+          <p class="subtitle accent">Once data is collected, new uses appear.</p>
+          <div class="grid-3">
+            <div class="card"><h4>Daily digests</h4><p>Local LLM summarizes overnight.</p></div>
+            <div class="card"><h4>Trend signals</h4><p>What topics are heating up across communities?</p></div>
+            <div class="card"><h4>Foundation</h4><p>Translation, video pipelines — all downstream of the collected corpus.</p></div>
+          </div>
+          <aside class="notes">
+            The collection is the boring half. The interesting half is what you can build on top once the data flows.
+          </aside>
+        </section>
+      </section>
+
+      <!-- ============ 3. Infra ============ -->
+      <section>
+        <section>
+          <span class="section-label">03 · Infra</span>
+          <h2>The machines I had</h2>
+          <p class="subtitle">Three locations, one VPN, no rented servers.</p>
+          <aside class="notes">
+            Before any code, here's the physical reality. This shapes how Claude Code worked across the project.
+          </aside>
+        </section>
+        <section>
+          <h3>The hardware</h3>
+          <div class="grid-3">
+            <div class="card"><h4>Homelab</h4><p>Kubernetes cluster. Argo CD already syncing from GitHub. The workhorse.</p></div>
+            <div class="card"><h4>Mac Studio</h4><p>Local LLM host. Good for summarization without sending data out.</p></div>
+            <div class="card"><h4>GCP VM (free tier)</h4><p>Tiny, always-on, public IP. Perfect for health checks &amp; reverse-proxy hops.</p></div>
+          </div>
+          <aside class="notes">
+            Each box has one job. Homelab = compute, Mac Studio = inference, GCP = the always-reachable foothold.
+          </aside>
+        </section>
+        <section data-background="#0a0f1d">
+          <h3>How they're connected</h3>
+          <div class="diagram-wrap">
+            <!-- Inline network topology SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" font-family="Inter, -apple-system, sans-serif">
+              <defs>
+                <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+                  <feGaussianBlur stdDeviation="3" result="blur"/>
+                  <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+                <linearGradient id="agent-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#4a90e2"/><stop offset="100%" stop-color="#7b61ff"/>
+                </linearGradient>
+                <linearGradient id="agent-grad-warm" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#f5a623"/><stop offset="100%" stop-color="#ff6b6b"/>
+                </linearGradient>
+                <linearGradient id="box-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#1c2540"/><stop offset="100%" stop-color="#0f1729"/>
+                </linearGradient>
+                <linearGradient id="home-region" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="rgba(74,144,226,0.07)"/><stop offset="100%" stop-color="rgba(74,144,226,0.02)"/>
+                </linearGradient>
+                <linearGradient id="ext-region" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="rgba(245,166,35,0.07)"/><stop offset="100%" stop-color="rgba(245,166,35,0.02)"/>
+                </linearGradient>
+                <symbol id="agent" viewBox="0 0 60 60">
+                  <rect x="14" y="18" width="32" height="26" rx="6" fill="url(#agent-grad)" stroke="#7ec1ff" stroke-width="1.2"/>
+                  <line x1="30" y1="18" x2="30" y2="8" stroke="#7ec1ff" stroke-width="1.5"/>
+                  <circle cx="30" cy="6" r="2.5" fill="#7ec1ff" filter="url(#glow)"/>
+                  <circle cx="22" cy="28" r="3" fill="#0e1320"/>
+                  <circle cx="38" cy="28" r="3" fill="#0e1320"/>
+                  <circle cx="22.6" cy="27.4" r="1" fill="#7ec1ff"/>
+                  <circle cx="38.6" cy="27.4" r="1" fill="#7ec1ff"/>
+                  <rect x="22" y="36" width="16" height="2.5" rx="1" fill="#0e1320"/>
+                  <line x1="14" y1="26" x2="6" y2="32" stroke="#7ec1ff" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="46" y1="26" x2="54" y2="32" stroke="#7ec1ff" stroke-width="2" stroke-linecap="round"/>
+                </symbol>
+                <symbol id="agent-warm" viewBox="0 0 60 60">
+                  <rect x="14" y="18" width="32" height="26" rx="6" fill="url(#agent-grad-warm)" stroke="#ffd28a" stroke-width="1.2"/>
+                  <line x1="30" y1="18" x2="30" y2="8" stroke="#ffd28a" stroke-width="1.5"/>
+                  <circle cx="30" cy="6" r="2.5" fill="#ffd28a" filter="url(#glow)"/>
+                  <circle cx="22" cy="28" r="3" fill="#0e1320"/>
+                  <circle cx="38" cy="28" r="3" fill="#0e1320"/>
+                  <circle cx="22.6" cy="27.4" r="1" fill="#ffd28a"/>
+                  <circle cx="38.6" cy="27.4" r="1" fill="#ffd28a"/>
+                  <rect x="22" y="36" width="16" height="2.5" rx="1" fill="#0e1320"/>
+                  <line x1="14" y1="26" x2="6" y2="32" stroke="#ffd28a" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="46" y1="26" x2="54" y2="32" stroke="#ffd28a" stroke-width="2" stroke-linecap="round"/>
+                </symbol>
+                <symbol id="laptop" viewBox="0 0 140 90">
+                  <rect x="10" y="10" width="120" height="70" rx="6" fill="url(#box-grad)" stroke="#4a90e2" stroke-width="1.5"/>
+                  <rect x="18" y="18" width="104" height="54" rx="2" fill="#0a0f1d" stroke="#2a3a5e" stroke-width="0.8"/>
+                  <rect x="0" y="80" width="140" height="6" rx="2" fill="#1c2540" stroke="#4a90e2" stroke-width="1"/>
+                  <rect x="60" y="80" width="20" height="3" fill="#2a3a5e"/>
+                </symbol>
+                <symbol id="rack" viewBox="0 0 140 110">
+                  <rect x="10" y="10" width="120" height="95" rx="4" fill="url(#box-grad)" stroke="#4a90e2" stroke-width="1.5"/>
+                  <rect x="20" y="20" width="100" height="14" rx="2" fill="#0a0f1d" stroke="#2a3a5e"/>
+                  <circle cx="28" cy="27" r="2" fill="#7ed321"/><circle cx="36" cy="27" r="2" fill="#7ed321"/>
+                  <rect x="50" y="24" width="60" height="6" rx="1" fill="#2a3a5e"/>
+                  <rect x="20" y="40" width="100" height="14" rx="2" fill="#0a0f1d" stroke="#2a3a5e"/>
+                  <circle cx="28" cy="47" r="2" fill="#7ed321"/><circle cx="36" cy="47" r="2" fill="#f5a623"/>
+                  <rect x="50" y="44" width="60" height="6" rx="1" fill="#2a3a5e"/>
+                  <rect x="20" y="60" width="100" height="14" rx="2" fill="#0a0f1d" stroke="#2a3a5e"/>
+                  <circle cx="28" cy="67" r="2" fill="#7ed321"/><circle cx="36" cy="67" r="2" fill="#7ed321"/>
+                  <rect x="50" y="64" width="60" height="6" rx="1" fill="#2a3a5e"/>
+                  <rect x="20" y="80" width="100" height="14" rx="2" fill="#0a0f1d" stroke="#2a3a5e"/>
+                  <circle cx="28" cy="87" r="2" fill="#7ed321"/>
+                  <rect x="50" y="84" width="60" height="6" rx="1" fill="#2a3a5e"/>
+                </symbol>
+                <symbol id="macstudio" viewBox="0 0 140 90">
+                  <rect x="10" y="20" width="120" height="55" rx="10" fill="url(#box-grad)" stroke="#4a90e2" stroke-width="1.5"/>
+                  <circle cx="70" cy="47" r="14" fill="none" stroke="#4a90e2" stroke-width="1" opacity="0.4"/>
+                  <circle cx="70" cy="47" r="8" fill="none" stroke="#4a90e2" stroke-width="1" opacity="0.6"/>
+                  <circle cx="70" cy="47" r="3" fill="#7ed321" filter="url(#glow)"/>
+                </symbol>
+                <symbol id="cloud" viewBox="0 0 160 100">
+                  <path d="M40 70 Q20 70 20 55 Q20 40 38 38 Q42 22 60 22 Q80 22 84 38 Q105 38 110 55 Q115 70 95 70 Z"
+                        fill="url(#box-grad)" stroke="#f5a623" stroke-width="1.5"/>
+                  <text x="65" y="58" font-size="14" fill="#f5a623" text-anchor="middle" font-weight="700">GCP</text>
+                </symbol>
+              </defs>
+              <rect width="1200" height="640" fill="#0a0f1d"/>
+              <rect x="40" y="50" width="720" height="540" rx="20" fill="url(#home-region)" stroke="#4a90e2" stroke-width="1.5" stroke-dasharray="6 6" opacity="0.9"/>
+              <text x="60" y="82" font-size="14" fill="#4a90e2" font-weight="700" letter-spacing="3">HOME NETWORK</text>
+              <rect x="820" y="50" width="340" height="540" rx="20" fill="url(#ext-region)" stroke="#f5a623" stroke-width="1.5" stroke-dasharray="6 6" opacity="0.9"/>
+              <text x="840" y="82" font-size="14" fill="#f5a623" font-weight="700" letter-spacing="3">EXTERNAL</text>
+              <g transform="translate(110, 130)">
+                <use href="#laptop" width="160" height="100"/>
+                <use href="#agent" width="70" height="70" x="45" y="-32"/>
+                <text x="80" y="125" font-size="15" fill="#e8eef7" text-anchor="middle" font-weight="600">MacBook</text>
+                <text x="80" y="143" font-size="11" fill="#8a99b3" text-anchor="middle">developer workstation</text>
+                <text x="80" y="160" font-size="10" fill="#4a90e2" text-anchor="middle" font-weight="700">CLAUDE CODE · CODEX</text>
+              </g>
+              <g transform="translate(450, 130)">
+                <use href="#rack" width="160" height="125"/>
+                <use href="#agent" width="60" height="60" x="50" y="-22"/>
+                <text x="80" y="143" font-size="15" fill="#e8eef7" text-anchor="middle" font-weight="600">Homelab</text>
+                <text x="80" y="161" font-size="11" fill="#8a99b3" text-anchor="middle">Kubernetes · Argo CD</text>
+                <text x="80" y="177" font-size="10" fill="#7ed321" text-anchor="middle" font-weight="600">Postgres · ES · Airflow</text>
+              </g>
+              <g transform="translate(280, 410)">
+                <use href="#macstudio" width="160" height="105"/>
+                <use href="#agent" width="60" height="60" x="50" y="-2"/>
+                <text x="80" y="125" font-size="15" fill="#e8eef7" text-anchor="middle" font-weight="600">Mac Studio</text>
+                <text x="80" y="143" font-size="11" fill="#8a99b3" text-anchor="middle">Local LLM inference</text>
+                <text x="80" y="160" font-size="10" fill="#4a90e2" text-anchor="middle" font-weight="600">summarization · TTS</text>
+              </g>
+              <g transform="translate(900, 230)">
+                <use href="#cloud" width="180" height="115"/>
+                <use href="#agent-warm" width="60" height="60" x="60" y="-12"/>
+                <text x="90" y="138" font-size="15" fill="#e8eef7" text-anchor="middle" font-weight="600">GCP VM</text>
+                <text x="90" y="156" font-size="11" fill="#8a99b3" text-anchor="middle">free tier · always on</text>
+                <text x="90" y="172" font-size="10" fill="#f5a623" text-anchor="middle" font-weight="600">health checks · proxy</text>
+              </g>
+              <g transform="translate(760, 320)">
+                <circle r="46" fill="#0e1320" stroke="#7b61ff" stroke-width="2"/>
+                <circle r="46" fill="none" stroke="#7b61ff" stroke-width="1" stroke-dasharray="3 4" opacity="0.6">
+                  <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="20s" repeatCount="indefinite"/>
+                </circle>
+                <text x="0" y="-2" font-size="16" fill="#7b61ff" text-anchor="middle" font-weight="700">VPN</text>
+                <text x="0" y="14" font-size="8" fill="#a48fff" text-anchor="middle" letter-spacing="1.5">TAILSCALE</text>
+              </g>
+              <g class="vpn-links" fill="none" stroke="#7b61ff" stroke-width="2" stroke-dasharray="6 5" opacity="0.85">
+                <path d="M 270 190 Q 500 240 715 320"/>
+                <path d="M 610 200 Q 680 240 720 295"/>
+                <path d="M 440 460 Q 600 400 720 345"/>
+                <path d="M 900 290 Q 850 305 805 318"/>
+              </g>
+              <style>
+                .vpn-links path { stroke-dashoffset: 0; animation: flow 1.6s linear infinite; }
+                @keyframes flow { to { stroke-dashoffset: -22; } }
+              </style>
+              <text x="600" y="620" font-size="13" fill="#8a99b3" text-anchor="middle" letter-spacing="2">
+                Every machine reachable from every other — agents pivot freely across boxes.
+              </text>
+            </svg>
+          </div>
+          <p class="muted" style="font-size:0.6em;margin-top:0.6em;">Home network (MacBook · Homelab · Mac Studio) ⟷ VPN ⟷ External (GCP VM)</p>
+          <aside class="notes">
+            The whole thing only works because everything sits on the same VPN. The MacBook can SSH into the homelab and the Mac Studio as if they were local. Note the agents riding on top of each machine — that's a visual we'll reuse later.
+          </aside>
+        </section>
+        <section>
+          <h3>Why the VPN matters</h3>
+          <ul class="clean">
+            <li>One SSH config from the MacBook reaches every node</li>
+            <li>Claude Code can pivot between machines mid-task without leaving the session</li>
+            <li>No public exposure of homelab services — only GCP is exposed</li>
+          </ul>
+          <p class="callout">The VPN is what makes "one agent, many machines" actually work.</p>
+          <aside class="notes">
+            Without a flat addressable network, multi-machine agent workflows are painful. The VPN was load-bearing.
+          </aside>
+        </section>
+      </section>
+
+      <!-- ============ 4. Architecture ============ -->
+      <section>
+        <section>
+          <span class="section-label">04 · Architectural Design</span>
+          <h2>From idea to design doc</h2>
+          <p class="subtitle">CLAUDE.md as the source of truth.</p>
+          <aside class="notes">
+            Before any code, I wrote out the context. The same CLAUDE.md pattern this very talk is built with.
+          </aside>
+        </section>
+        <section>
+          <h3>What I gave Claude Code up front</h3>
+          <div class="grid-2">
+            <div class="col-stack">
+              <div class="card"><h4>Goal</h4><p>Collect → store → search → summarize → notify.</p></div>
+              <div class="card"><h4>Inventory</h4><p>Homelab + Mac Studio + GCP. K8s. Argo CD. VPN.</p></div>
+            </div>
+            <div class="col-stack">
+              <div class="card"><h4>Platform picks</h4><p>Airflow · Postgres · Elasticsearch · Web frontend</p></div>
+              <div class="card"><h4>Constraints</h4><p>Stay on existing infra. No paid SaaS. Keep ops simple.</p></div>
+            </div>
+          </div>
+          <aside class="notes">
+            Notice: I picked the platforms. I didn't ask Claude what to use — that's where you waste hours debating.
+          </aside>
+        </section>
+        <section>
+          <h3>The system, end-to-end</h3>
+          <div class="mermaid">
+flowchart LR
+  subgraph Sources["Web communities"]
+    C1["Community A"]
+    C2["Community B"]
+    C3["Community C"]
+  end
+  subgraph Homelab["Homelab · Kubernetes"]
+    direction TB
+    AF_C["Crawler DAGs"]
+    AF_D["Digest DAG"]
+    PG[("Postgres")]
+    ES[("Elasticsearch")]
+  end
+  subgraph MacStudio["Mac Studio"]
+    LLM["Local LLM<br/>(NSFW &amp; summary)"]
+  end
+  subgraph GCP["GCP VM"]
+    FE["Web frontend"]
+  end
+  subgraph Delivery["Delivery"]
+    TG["Telegram bot"]
+  end
+  C1 --> AF_C
+  C2 --> AF_C
+  C3 --> AF_C
+  AF_C --> PG
+  PG --> ES
+  PG -->|"list"| FE
+  ES -->|"search"| FE
+  PG --> AF_D
+  AF_D -->|"call"| LLM
+  LLM -->|"summary"| AF_D
+  AF_D --> TG
+          </div>
+          <aside class="notes">
+            Two flavors of Airflow DAG run on the homelab. Crawler DAGs pull from each community, land rows in Postgres, and also feed Elasticsearch. The frontend on the GCP VM talks to both: it reads Postgres directly for the post listings, and hits Elasticsearch for the search feature. A separate digest DAG pulls yesterday's window from Postgres, calls the local LLM on the Mac Studio to summarize, and pushes the result to Telegram — all from within the same DAG. The Mac Studio is just an inference endpoint here, not an orchestrator.
+          </aside>
+        </section>
+        <section>
+          <h3>The split that unblocked me</h3>
+          <p class="subtitle">"Split this plan by machine, so I can run sessions in parallel."</p>
+          <div class="grid-3">
+            <div class="card"><h4>Homelab session</h4><p>K8s manifests, Airflow (crawler &amp; digest DAGs), Postgres, ES</p></div>
+            <div class="card"><h4>Mac Studio session</h4><p>Local LLM serving — an inference endpoint the DAG can call</p></div>
+            <div class="card"><h4>GCP session</h4><p>Web frontend, health checks, reverse proxy, public touchpoints</p></div>
+          </div>
+          <p class="callout">One session per machine = clean state, no context bleed.</p>
+          <aside class="notes">
+            Ask Claude to chunk the design by where work executes. Then run those chunks as separate sessions.
+          </aside>
+        </section>
+        <section class="fanout-slide">
+          <h3>How the split actually happens</h3>
+          <p class="subtitle" style="font-size:0.85em;margin-bottom:0.5em;">One master CLAUDE.md → one prompt → three per-machine CLAUDE.md files.</p>
+
+          <div class="fanout-diagram">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 200" font-family="Inter, sans-serif">
+              <defs>
+                <linearGradient id="master-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#4a90e2"/><stop offset="100%" stop-color="#7b61ff"/>
+                </linearGradient>
+                <linearGradient id="leaf-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#1c2540"/><stop offset="100%" stop-color="#0f1729"/>
+                </linearGradient>
+                <marker id="fan-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                  <polygon points="0 0, 10 5, 0 10" fill="#7b61ff"/>
+                </marker>
+              </defs>
+
+              <!-- Master node -->
+              <g transform="translate(60, 60)">
+                <rect width="220" height="100" rx="8" fill="url(#leaf-grad)" stroke="url(#master-grad)" stroke-width="2"/>
+                <text x="110" y="32" font-size="13" fill="#7b61ff" text-anchor="middle" font-weight="700" letter-spacing="2">MASTER</text>
+                <text x="110" y="55" font-size="16" fill="#e8eef7" text-anchor="middle" font-weight="600">CLAUDE.md</text>
+                <text x="110" y="78" font-size="10" fill="#8a99b3" text-anchor="middle">goal · inventory · schema</text>
+                <text x="110" y="93" font-size="10" fill="#8a99b3" text-anchor="middle">platforms · conventions</text>
+              </g>
+
+              <!-- Prompt pill in the middle -->
+              <g transform="translate(330, 90)">
+                <rect width="240" height="44" rx="22" fill="#0e1320" stroke="#f5a623" stroke-width="1.5"/>
+                <text x="120" y="20" font-size="9" fill="#f5a623" text-anchor="middle" font-weight="700" letter-spacing="2">PROMPT</text>
+                <text x="120" y="35" font-size="11" fill="#e8eef7" text-anchor="middle" font-style="italic">"split this by machine"</text>
+              </g>
+
+              <!-- Arrows from master to prompt, prompt to leaves -->
+              <path d="M 280 110 L 325 110" fill="none" stroke="#7b61ff" stroke-width="2" marker-end="url(#fan-arrow)"/>
+              <path d="M 570 110 Q 620 110 660 50"  fill="none" stroke="#7b61ff" stroke-width="2" marker-end="url(#fan-arrow)"/>
+              <path d="M 570 110 L 660 110"                fill="none" stroke="#7b61ff" stroke-width="2" marker-end="url(#fan-arrow)"/>
+              <path d="M 570 110 Q 620 110 660 170" fill="none" stroke="#7b61ff" stroke-width="2" marker-end="url(#fan-arrow)"/>
+
+              <!-- Leaf: Homelab -->
+              <g transform="translate(670, 20)">
+                <rect width="220" height="50" rx="6" fill="url(#leaf-grad)" stroke="#4a90e2" stroke-width="1.5"/>
+                <text x="14" y="20" font-size="11" fill="#4a90e2" font-weight="700" letter-spacing="1">HOMELAB</text>
+                <text x="14" y="38" font-size="11" fill="#e8eef7">CLAUDE.md — K8s, Airflow, PG, ES</text>
+              </g>
+              <!-- Leaf: Mac Studio -->
+              <g transform="translate(670, 85)">
+                <rect width="220" height="50" rx="6" fill="url(#leaf-grad)" stroke="#4a90e2" stroke-width="1.5"/>
+                <text x="14" y="20" font-size="11" fill="#4a90e2" font-weight="700" letter-spacing="1">MAC STUDIO</text>
+                <text x="14" y="38" font-size="11" fill="#e8eef7">CLAUDE.md — local LLM endpoint</text>
+              </g>
+              <!-- Leaf: GCP -->
+              <g transform="translate(670, 150)">
+                <rect width="220" height="50" rx="6" fill="url(#leaf-grad)" stroke="#f5a623" stroke-width="1.5"/>
+                <text x="14" y="20" font-size="11" fill="#f5a623" font-weight="700" letter-spacing="1">GCP VM</text>
+                <text x="14" y="38" font-size="11" fill="#e8eef7">CLAUDE.md — frontend, nginx, TLS</text>
+              </g>
+
+              <!-- Right caption -->
+              <text x="920" y="100" font-size="11" fill="#8a99b3">Each session</text>
+              <text x="920" y="116" font-size="11" fill="#8a99b3">only sees its</text>
+              <text x="920" y="132" font-size="11" fill="#8a99b3">own slice.</text>
+            </svg>
+          </div>
+
+          <div class="fanout-snippets">
+            <div class="snippet">
+              <div class="snippet-title">master CLAUDE.md <span class="muted">(excerpt)</span></div>
+<pre class="snippet-code"><code># Personal Community Aggregator
+## Infrastructure
+- MacBook · Homelab (K8s) · Mac Studio · GCP VM
+- Tailscale between all four
+## Platforms
+- Airflow · Postgres · Elasticsearch
+- Local LLM (Mac Studio) · Next.js (GCP)
+## Where work runs
+- Homelab session — K8s, Airflow, PG, ES
+- Mac Studio session — LLM serving
+- GCP session — frontend, nginx, certs</code></pre>
+            </div>
+
+            <div class="snippet">
+              <div class="snippet-title">homelab CLAUDE.md <span class="muted">(derived)</span></div>
+<pre class="snippet-code"><code># Homelab session
+## Scope
+K8s cluster only — out of scope: LLM, frontend.
+## What lives here
+Airflow DAGs · Postgres · Elasticsearch · Argo CD
+## External endpoints I call
+- mac-studio.tailnet:8080 (NSFW + summary)
+## Conventions
+- Manifests live in `manifests/` repo, NOT app repos
+- Never kubectl apply directly — commit to manifests/</code></pre>
+            </div>
+
+            <div class="snippet">
+              <div class="snippet-title">mac-studio CLAUDE.md <span class="muted">(derived)</span></div>
+<pre class="snippet-code"><code># Mac Studio session
+## Scope
+Local LLM serving only.
+## Endpoints exposed
+- POST /v1/classify → { nsfw: bool }
+- POST /v1/summary  → { text: string }
+## Conventions
+- No public exposure — Tailscale only
+- Model swap = restart launchd service
+- Pre-stage GGUF files in ~/models/</code></pre>
+            </div>
+          </div>
+
+          <p class="muted" style="font-size:0.6em;text-align:center;margin-top:0.6em;">Full examples in <code>examples/</code> — master + 3 per-machine files.</p>
+          <aside class="notes">
+            Concretely: I keep one master CLAUDE.md in the repo root that captures the whole project — goal, infra, schema, platforms, conventions. Then a single prompt — literally "split this by machine and produce one CLAUDE.md per session" — gives me three derived files. Each session only loads its own slice. The homelab session never sees the launchd or nginx details. The Mac Studio session never sees Argo CD. The GCP session never sees the data schema. Three benefits: faster context (no irrelevant tokens), less content rot (changes to the master don't accidentally regenerate stale assumptions in the per-machine files until I ask), and clearer accountability (when something goes wrong, I know exactly which file the agent was reading from).
+          </aside>
+        </section>
+      </section>
+
+      <!-- ============ 5. Operations ============ -->
+      <section>
+        <section>
+          <span class="section-label">05 · Operations</span>
+          <h2>Running it day-to-day</h2>
+          <p class="subtitle">Where Claude Code earned its keep.</p>
+          <aside class="notes">
+            Design is one-off. Ops is forever. This is where Claude Code shifted from "code generator" to actual operator.
+          </aside>
+        </section>
+        <section>
+          <h3>Database work</h3>
+          <div class="grid-2">
+            <div class="col-stack">
+              <div class="card"><h4>Schema in CLAUDE.md</h4><p>What to crawl, what to store, what shape it lands in.</p></div>
+              <div class="card"><h4>Migrations</h4><p>Claude generates SQL, I review, it runs against Postgres.</p></div>
+              <div class="card"><h4>Pruning &amp; normalization</h4><p>Periodic clean-up queries, dedupe runs, column-type fixes.</p></div>
+            </div>
+            <div class="media-placeholder">
+              <span class="icon">🗄️</span>
+              <span class="label">Screenshot placeholder</span>
+              <span>Sample CLAUDE.md schema block / psql session</span>
+            </div>
+          </div>
+          <aside class="notes">
+            Keeping the schema documented in CLAUDE.md meant Claude always knew the data model. Crawl code and query code stayed in sync.
+          </aside>
+        </section>
+        <section>
+          <h3>Deployments — the happy path</h3>
+          <div class="mermaid">
+flowchart LR
+  Dev["MacBook<br/>(Claude/Codex)"] -->|"git push"| App["App repo"]
+  App -->|"Actions"| Build["Docker build"]
+  Build -->|"push image"| Reg["Image registry"]
+  Build -->|"bump image tag<br/>(commit)"| Man["K8s manifest repo"]
+  Man -->|"watch"| Argo["Argo CD"]
+  Argo -->|"sync"| K8s["Kubernetes (homelab)"]
+          </div>
+          <p class="muted" style="font-size:0.6em;">App repo build → push image <em>and</em> commit new tag into the manifest repo → Argo CD watches the manifest repo, syncs the cluster.</p>
+          <aside class="notes">
+            GitOps loop. The app repo and the manifest repo are separate. When Actions finishes the build, it does two things: pushes the image to the registry, and commits the new image tag back into the manifest repo. Argo CD is *only* watching the manifest repo — it doesn't poll the registry. So the cluster's desired state always lives in Git, which means re-syncs, rollbacks, and audits are just git operations. For application code, this whole loop is hands-off after the initial push.
+          </aside>
+        </section>
+        <section>
+          <h3>The other path — SSH</h3>
+          <p class="subtitle accent">Not everything fits Git-driven deploys.</p>
+          <ul class="clean">
+            <li>Resource bumps on a stuck pod</li>
+            <li>One-off DB hotfix or index rebuild</li>
+            <li>Local LLM model swap on the Mac Studio</li>
+            <li>GCP VM tweaks (nginx, certs)</li>
+          </ul>
+          <p class="callout">Claude Code with SSH access = a real on-call hands-on operator.</p>
+          <aside class="notes">
+            Sometimes you just need to SSH and fix it. Claude Code is great at this because the VPN puts everything one hop away.
+          </aside>
+        </section>
+      </section>
+
+      <!-- ============ 6. Multi-Agent ============ -->
+      <section>
+        <section>
+          <span class="section-label">06 · Multi-Agent</span>
+          <h2>Two agents, different jobs</h2>
+          <p class="subtitle">Claude Code and Codex, side by side.</p>
+          <aside class="notes">
+            The part of the talk I find most fun. The division of labor between two coding agents.
+          </aside>
+        </section>
+        <section>
+          <h3>The division of labor</h3>
+          <div class="grid-2">
+            <div class="card">
+              <h4>Claude Code</h4>
+              <p><strong>Infrastructure &amp; operations.</strong></p>
+              <p>SSH into machines. Edit manifests. Run kubectl. Patch DAGs in place. Debug pods.</p>
+            </div>
+            <div class="card warm">
+              <h4>Codex</h4>
+              <p><strong>Application code.</strong></p>
+              <p>Airflow DAG implementations. Frontend app. Pure code repos. PRs into GitHub.</p>
+            </div>
+          </div>
+          <p class="muted" style="font-size:0.7em;">Early on, Codex had to wait — Claude needed to set the infra up first.</p>
+          <aside class="notes">
+            Claude Code is the one with hands on the machines. Codex is the one with hands on the codebase. No overlap.
+          </aside>
+        </section>
+        <section data-background="#0a0f1d">
+          <h3>What it looks like in motion</h3>
+          <div class="diagram-wrap">
+            <!-- Inline multi-agent flow SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 660" font-family="Inter, -apple-system, sans-serif">
+              <defs>
+                <filter id="glow2" x="-30%" y="-30%" width="160%" height="160%">
+                  <feGaussianBlur stdDeviation="3" result="blur"/>
+                  <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+                <linearGradient id="claude-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#4a90e2"/><stop offset="100%" stop-color="#7b61ff"/>
+                </linearGradient>
+                <linearGradient id="codex-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#f5a623"/><stop offset="100%" stop-color="#ff6b6b"/>
+                </linearGradient>
+                <linearGradient id="box-grad2" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#1c2540"/><stop offset="100%" stop-color="#0f1729"/>
+                </linearGradient>
+                <symbol id="agent-claude" viewBox="0 0 60 60">
+                  <rect x="14" y="18" width="32" height="26" rx="6" fill="url(#claude-grad)" stroke="#7ec1ff" stroke-width="1.2"/>
+                  <line x1="30" y1="18" x2="30" y2="8" stroke="#7ec1ff" stroke-width="1.5"/>
+                  <circle cx="30" cy="6" r="2.5" fill="#7ec1ff" filter="url(#glow2)"/>
+                  <circle cx="22" cy="28" r="3" fill="#0e1320"/><circle cx="38" cy="28" r="3" fill="#0e1320"/>
+                  <circle cx="22.6" cy="27.4" r="1" fill="#7ec1ff"/><circle cx="38.6" cy="27.4" r="1" fill="#7ec1ff"/>
+                  <rect x="22" y="36" width="16" height="2.5" rx="1" fill="#0e1320"/>
+                </symbol>
+                <symbol id="agent-codex" viewBox="0 0 60 60">
+                  <rect x="14" y="18" width="32" height="26" rx="6" fill="url(#codex-grad)" stroke="#ffd28a" stroke-width="1.2"/>
+                  <line x1="30" y1="18" x2="30" y2="8" stroke="#ffd28a" stroke-width="1.5"/>
+                  <circle cx="30" cy="6" r="2.5" fill="#ffd28a" filter="url(#glow2)"/>
+                  <circle cx="22" cy="28" r="3" fill="#0e1320"/><circle cx="38" cy="28" r="3" fill="#0e1320"/>
+                  <circle cx="22.6" cy="27.4" r="1" fill="#ffd28a"/><circle cx="38.6" cy="27.4" r="1" fill="#ffd28a"/>
+                  <rect x="22" y="36" width="16" height="2.5" rx="1" fill="#0e1320"/>
+                </symbol>
+                <symbol id="laptop2" viewBox="0 0 140 90">
+                  <rect x="10" y="10" width="120" height="70" rx="6" fill="url(#box-grad2)" stroke="#4a90e2" stroke-width="1.5"/>
+                  <rect x="18" y="18" width="104" height="54" rx="2" fill="#0a0f1d"/>
+                  <rect x="0" y="80" width="140" height="6" rx="2" fill="#1c2540" stroke="#4a90e2"/>
+                </symbol>
+                <symbol id="rack2" viewBox="0 0 140 110">
+                  <rect x="10" y="10" width="120" height="95" rx="4" fill="url(#box-grad2)" stroke="#4a90e2" stroke-width="1.5"/>
+                  <rect x="20" y="20" width="100" height="14" rx="2" fill="#0a0f1d"/>
+                  <circle cx="28" cy="27" r="2" fill="#7ed321"/>
+                  <rect x="50" y="24" width="60" height="6" rx="1" fill="#2a3a5e"/>
+                  <rect x="20" y="40" width="100" height="14" rx="2" fill="#0a0f1d"/>
+                  <circle cx="28" cy="47" r="2" fill="#7ed321"/>
+                  <rect x="50" y="44" width="60" height="6" rx="1" fill="#2a3a5e"/>
+                  <rect x="20" y="60" width="100" height="14" rx="2" fill="#0a0f1d"/>
+                  <circle cx="28" cy="67" r="2" fill="#f5a623"/>
+                  <rect x="50" y="64" width="60" height="6" rx="1" fill="#2a3a5e"/>
+                  <rect x="20" y="80" width="100" height="14" rx="2" fill="#0a0f1d"/>
+                  <circle cx="28" cy="87" r="2" fill="#7ed321"/>
+                  <rect x="50" y="84" width="60" height="6" rx="1" fill="#2a3a5e"/>
+                </symbol>
+                <symbol id="github" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="40" fill="#1c2540" stroke="#e8eef7" stroke-width="2"/>
+                  <text x="50" y="58" font-size="34" fill="#e8eef7" text-anchor="middle" font-weight="700">Gh</text>
+                </symbol>
+                <symbol id="registry" viewBox="0 0 120 100">
+                  <rect x="10" y="20" width="100" height="65" rx="6" fill="url(#box-grad2)" stroke="#4a90e2" stroke-width="1.5"/>
+                  <rect x="22" y="32" width="76" height="10" rx="2" fill="#0a0f1d"/>
+                  <rect x="22" y="46" width="76" height="10" rx="2" fill="#0a0f1d"/>
+                  <rect x="22" y="60" width="76" height="10" rx="2" fill="#0a0f1d"/>
+                  <text x="60" y="14" font-size="9" fill="#8a99b3" text-anchor="middle" letter-spacing="2">REGISTRY</text>
+                </symbol>
+                <symbol id="argo" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="38" fill="#1c2540" stroke="#ff7e6b" stroke-width="2"/>
+                  <path d="M 30 60 Q 50 30 70 60" fill="none" stroke="#ff7e6b" stroke-width="3" stroke-linecap="round"/>
+                  <circle cx="30" cy="60" r="4" fill="#ff7e6b"/><circle cx="70" cy="60" r="4" fill="#ff7e6b"/>
+                  <text x="50" y="82" font-size="9" fill="#ff7e6b" text-anchor="middle" font-weight="700" letter-spacing="1">ARGO CD</text>
+                </symbol>
+                <symbol id="manifest" viewBox="0 0 100 100">
+                  <rect x="14" y="20" width="72" height="60" rx="4" fill="#1c2540" stroke="#7ed321" stroke-width="1.5"/>
+                  <text x="50" y="14" font-size="9" fill="#7ed321" text-anchor="middle" font-weight="700" letter-spacing="1">MANIFEST</text>
+                  <rect x="22" y="30" width="56" height="4" rx="1" fill="#2a3a5e"/>
+                  <rect x="22" y="38" width="40" height="4" rx="1" fill="#2a3a5e"/>
+                  <rect x="22" y="46" width="56" height="4" rx="1" fill="#7ed321" opacity="0.7"/>
+                  <rect x="22" y="54" width="48" height="4" rx="1" fill="#2a3a5e"/>
+                  <rect x="22" y="62" width="56" height="4" rx="1" fill="#2a3a5e"/>
+                  <rect x="22" y="70" width="32" height="4" rx="1" fill="#2a3a5e"/>
+                </symbol>
+                <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                  <polygon points="0 0, 10 5, 0 10" fill="#7b61ff"/>
+                </marker>
+                <marker id="arrowhead-warm" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                  <polygon points="0 0, 10 5, 0 10" fill="#f5a623"/>
+                </marker>
+                <marker id="arrowhead-success" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                  <polygon points="0 0, 10 5, 0 10" fill="#7ed321"/>
+                </marker>
+              </defs>
+              <rect width="1200" height="660" fill="#0a0f1d"/>
+              <text x="40" y="100" font-size="12" fill="#4a90e2" font-weight="700" letter-spacing="3">CLAUDE CODE LANE · OPS</text>
+              <text x="40" y="430" font-size="12" fill="#f5a623" font-weight="700" letter-spacing="3">CODEX LANE · CODE</text>
+              <g>
+                <rect x="30" y="110" width="1140" height="220" rx="14" fill="rgba(74,144,226,0.04)" stroke="rgba(74,144,226,0.25)" stroke-width="1" stroke-dasharray="4 4"/>
+                <g transform="translate(80, 180)">
+                  <use href="#laptop2" width="140" height="90"/>
+                  <use href="#agent-claude" width="60" height="60" x="40" y="-22"/>
+                  <text x="70" y="110" font-size="13" fill="#e8eef7" text-anchor="middle" font-weight="600">MacBook</text>
+                  <text x="70" y="126" font-size="10" fill="#4a90e2" text-anchor="middle">Claude Code session</text>
+                </g>
+                <text x="320" y="170" font-size="11" fill="#7b61ff" font-weight="700" letter-spacing="2">① SSH</text>
+                <path d="M 230 220 L 470 220" fill="none" stroke="#7b61ff" stroke-width="2.5" marker-end="url(#arrowhead)" stroke-dasharray="6 5">
+                  <animate attributeName="stroke-dashoffset" from="0" to="-22" dur="1.4s" repeatCount="indefinite"/>
+                </path>
+                <g transform="translate(480, 170)">
+                  <use href="#rack2" width="120" height="100"/>
+                  <text x="60" y="118" font-size="13" fill="#e8eef7" text-anchor="middle" font-weight="600">Homelab K8s</text>
+                  <text x="60" y="134" font-size="10" fill="#8a99b3" text-anchor="middle">kubectl · psql · DAG patch</text>
+                </g>
+                <path d="M 230 200 Q 350 130 700 180" fill="none" stroke="#7b61ff" stroke-width="2" stroke-dasharray="6 5" opacity="0.8" marker-end="url(#arrowhead)">
+                  <animate attributeName="stroke-dashoffset" from="0" to="-22" dur="1.4s" repeatCount="indefinite"/>
+                </path>
+                <g transform="translate(710, 170)">
+                  <rect x="0" y="0" width="140" height="80" rx="10" fill="url(#box-grad2)" stroke="#4a90e2" stroke-width="1.5"/>
+                  <circle cx="70" cy="40" r="14" fill="none" stroke="#4a90e2" stroke-width="1" opacity="0.4"/>
+                  <circle cx="70" cy="40" r="3" fill="#7ed321" filter="url(#glow2)"/>
+                  <text x="70" y="98" font-size="13" fill="#e8eef7" text-anchor="middle" font-weight="600">Mac Studio</text>
+                  <text x="70" y="114" font-size="10" fill="#8a99b3" text-anchor="middle">model swap · restart</text>
+                </g>
+                <g transform="translate(900, 160)">
+                  <path d="M 30 70 Q 10 70 10 55 Q 10 40 28 38 Q 32 22 50 22 Q 70 22 74 38 Q 95 38 100 55 Q 105 70 85 70 Z" fill="url(#box-grad2)" stroke="#f5a623" stroke-width="1.5"/>
+                  <text x="55" y="58" font-size="13" fill="#f5a623" text-anchor="middle" font-weight="700">GCP</text>
+                  <text x="55" y="108" font-size="12" fill="#e8eef7" text-anchor="middle" font-weight="600">GCP VM</text>
+                  <text x="55" y="124" font-size="10" fill="#8a99b3" text-anchor="middle">nginx · certs</text>
+                </g>
+                <path d="M 230 210 Q 500 100 920 175" fill="none" stroke="#7b61ff" stroke-width="2" stroke-dasharray="6 5" opacity="0.6" marker-end="url(#arrowhead)">
+                  <animate attributeName="stroke-dashoffset" from="0" to="-22" dur="1.4s" repeatCount="indefinite"/>
+                </path>
+              </g>
+              <g>
+                <rect x="30" y="440" width="1140" height="200" rx="14" fill="rgba(245,166,35,0.04)" stroke="rgba(245,166,35,0.25)" stroke-width="1" stroke-dasharray="4 4"/>
+
+                <!-- MacBook (Codex) -->
+                <g transform="translate(50, 500)">
+                  <use href="#laptop2" width="110" height="72"/>
+                  <use href="#agent-codex" width="52" height="52" x="29" y="-18"/>
+                  <text x="55" y="90" font-size="12" fill="#e8eef7" text-anchor="middle" font-weight="600">MacBook</text>
+                  <text x="55" y="104" font-size="9" fill="#f5a623" text-anchor="middle">Codex</text>
+                </g>
+
+                <!-- ② git push → App repo -->
+                <text x="195" y="530" font-size="10" fill="#f5a623" font-weight="700" letter-spacing="1">② push</text>
+                <path d="M 165 545 L 235 545" fill="none" stroke="#f5a623" stroke-width="2.2" marker-end="url(#arrowhead-warm)" stroke-dasharray="6 5">
+                  <animate attributeName="stroke-dashoffset" from="0" to="-22" dur="1.4s" repeatCount="indefinite" begin="0.1s"/>
+                </path>
+
+                <!-- App repo (GitHub) -->
+                <g transform="translate(240, 510)">
+                  <use href="#github" width="72" height="72"/>
+                  <text x="36" y="85" font-size="11" fill="#e8eef7" text-anchor="middle" font-weight="600">App repo</text>
+                </g>
+
+                <!-- ③ Actions build → Image registry -->
+                <text x="340" y="530" font-size="10" fill="#f5a623" font-weight="700" letter-spacing="1">③ build</text>
+                <path d="M 315 545 L 395 545" fill="none" stroke="#f5a623" stroke-width="2.2" marker-end="url(#arrowhead-warm)" stroke-dasharray="6 5">
+                  <animate attributeName="stroke-dashoffset" from="0" to="-22" dur="1.4s" repeatCount="indefinite" begin="0.3s"/>
+                </path>
+
+                <!-- Image registry -->
+                <g transform="translate(400, 510)">
+                  <use href="#registry" width="90" height="76"/>
+                  <text x="45" y="92" font-size="11" fill="#e8eef7" text-anchor="middle" font-weight="600">Image registry</text>
+                </g>
+
+                <!-- ④ commit tag bump → Manifest repo -->
+                <text x="515" y="525" font-size="10" fill="#7ed321" font-weight="700" letter-spacing="1">④ bump tag</text>
+                <text x="515" y="540" font-size="9" fill="#8a99b3" letter-spacing="1">(commit)</text>
+                <path d="M 495 555 L 575 555" fill="none" stroke="#7ed321" stroke-width="2.2" marker-end="url(#arrowhead-success)" stroke-dasharray="6 5">
+                  <animate attributeName="stroke-dashoffset" from="0" to="-22" dur="1.4s" repeatCount="indefinite" begin="0.5s"/>
+                </path>
+
+                <!-- Manifest repo -->
+                <g transform="translate(580, 510)">
+                  <use href="#manifest" width="80" height="80"/>
+                  <text x="40" y="100" font-size="11" fill="#e8eef7" text-anchor="middle" font-weight="600">Manifest repo</text>
+                </g>
+
+                <!-- ⑤ Argo watches → Argo CD -->
+                <text x="685" y="530" font-size="10" fill="#ff7e6b" font-weight="700" letter-spacing="1">⑤ watch</text>
+                <path d="M 665 545 L 755 545" fill="none" stroke="#ff7e6b" stroke-width="2.2" marker-end="url(#arrowhead)" stroke-dasharray="6 5">
+                  <animate attributeName="stroke-dashoffset" from="0" to="-22" dur="1.4s" repeatCount="indefinite" begin="0.7s"/>
+                </path>
+
+                <!-- Argo CD -->
+                <g transform="translate(760, 505)">
+                  <use href="#argo" width="86" height="86"/>
+                </g>
+
+                <!-- ⑥ Deploy: up-arrow to homelab K8s on the top lane -->
+                <text x="880" y="455" font-size="10" fill="#7ed321" font-weight="700" letter-spacing="1">⑥ deploy</text>
+                <path d="M 850 510 Q 920 410 580 270" fill="none" stroke="#7ed321" stroke-width="2.5" stroke-dasharray="6 5" marker-end="url(#arrowhead)" opacity="0.85">
+                  <animate attributeName="stroke-dashoffset" from="0" to="-22" dur="1.4s" repeatCount="indefinite" begin="0.9s"/>
+                </path>
+              </g>
+              <line x1="30" y1="385" x2="1170" y2="385" stroke="#1c2540" stroke-width="1" stroke-dasharray="2 4"/>
+              <g transform="translate(40, 32)">
+                <text x="0" y="0" font-size="13" fill="#e8eef7" font-weight="700" letter-spacing="2">FLOW</text>
+                <g font-size="10" fill="#8a99b3">
+                  <text x="60" y="0"><tspan fill="#7b61ff" font-weight="700">①</tspan> Claude SSH ops</text>
+                  <text x="220" y="0"><tspan fill="#f5a623" font-weight="700">②</tspan> Codex push</text>
+                  <text x="360" y="0"><tspan fill="#f5a623" font-weight="700">③</tspan> Build &amp; push image</text>
+                  <text x="520" y="0"><tspan fill="#7ed321" font-weight="700">④</tspan> Commit tag bump</text>
+                  <text x="700" y="0"><tspan fill="#ff7e6b" font-weight="700">⑤</tspan> Argo watches</text>
+                  <text x="860" y="0"><tspan fill="#7ed321" font-weight="700">⑥</tspan> Cluster reconciles</text>
+                </g>
+              </g>
+            </svg>
+          </div>
+          <aside class="notes">
+            Walk through the steps. (1) Claude Code SSHs from the MacBook into the homelab or Mac Studio for ops. (2) In parallel, Codex pushes to the app repo. (3) Actions builds the image and pushes it to the registry. (4) The same Action commits a tag bump into the manifest repo — that's the GitOps trigger. (5) Argo CD is only watching the manifest repo; it sees the new commit. (6) Cluster reconciles, pod rolls. Cluster state always lives in Git.
+          </aside>
+        </section>
+        <section>
+          <h3>Why the split worked — and where it bites</h3>
+          <div class="grid-2">
+            <div>
+              <h4 class="accent-success" style="font-size:0.85em;margin-bottom:0.3em;">Upsides</h4>
+              <ul class="clean">
+                <li><strong>No collision</strong> — different layers, never the same file</li>
+                <li><strong>Right tool for the layer</strong> — Claude's terminal, Codex's repo</li>
+                <li><strong>Easier review</strong> — Codex diffs in GitHub, Claude changes in the cluster</li>
+                <li><strong>Recoverable</strong> — Argo CD is the truth; re-sync to recover</li>
+                <li><strong>Token budget spread</strong> — two quotas, half the rate-limit pressure</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="accent-warm" style="font-size:0.85em;margin-bottom:0.3em;">Downsides</h4>
+              <ul class="clean">
+                <li><strong>Overlap = conflict</strong> — if both touch the same area, you get merge or state conflicts</li>
+                <li><strong>No shared memory</strong> — each agent remembers only its own work; the other can be blind to it</li>
+                <li class="muted" style="font-size:0.78em;padding-left:1.2em;border:none;">↳ <em>Mitigation:</em> have the agent re-read the current state from the code repo or the live cluster before acting</li>
+              </ul>
+            </div>
+          </div>
+          <p class="callout" style="margin-top:0.6em;">Two specialized agents beat one generalist — as long as you keep their lanes from crossing.</p>
+          <aside class="notes">
+            Don't multiplex one agent across all jobs. Give each agent a lane. One practical upside on top of the obvious ones: rate limits. Everything through one agent and you hit the daily or weekly cap mid-task — split across two and you get roughly twice the runway.
+            <br/><br/>
+            Now the downsides, because this isn't free. First — overlap. If you accidentally let both agents touch the same file or the same cluster object, you get conflicts: either a git merge conflict, or worse, drift between what each agent thinks the world looks like. Second — they don't share memory. Each agent's notes and memory live in its own session. So if Claude Code just patched a deployment, Codex has no idea unless it goes and looks. The mitigation is the same in both cases: don't trust either agent's mental model. Have it re-read the source of truth — the code repo, the live cluster, the actual state — at the start of any change.
+          </aside>
+        </section>
+      </section>
+
+      <!-- ============ 7. Lessons ============ -->
+      <section>
+        <section>
+          <span class="section-label">07 · Hiccups &amp; Lessons</span>
+          <h2>It did not work the first time</h2>
+          <p class="subtitle">A short tour of things that went wrong.</p>
+          <aside class="notes">
+            Honest section. This isn't a "I prompted once and shipped" story.
+          </aside>
+        </section>
+        <section>
+          <h3>What broke early on</h3>
+          <div class="grid-2">
+            <div class="col-stack">
+              <div class="card warm"><h4>K8s under-provisioned</h4><p>Pods up, but resources too tight. OOMs and throttling.</p></div>
+              <div class="card warm"><h4>Elasticsearch search misses</h4><p>Term extraction option wasn't set — relevant docs were invisible.</p></div>
+            </div>
+            <div class="col-stack">
+              <div class="card warm"><h4>Airflow DAG fragility</h4><p>No parallelism. One failure cascaded into the next day's run.</p></div>
+              <div class="card warm"><h4>Silent crawls</h4><p>Logs missing. Failed collections looked like empty days.</p></div>
+            </div>
+          </div>
+          <aside class="notes">
+            These were invisible until I started looking. Claude Code helped triage each one — but the human still has to look.
+          </aside>
+        </section>
+        <section class="compact-cards tight">
+          <h3>What worked surprisingly well</h3>
+          <div class="grid-2">
+            <div class="card success">
+              <h4>Generic crawlers</h4>
+              <p>I gave only the URLs. Claude figured out the list parsing for each community on its own.</p>
+            </div>
+            <div class="card success">
+              <h4>Schema-driven prompts</h4>
+              <p>Once the DB schema lived in CLAUDE.md, crawler and query code stopped drifting.</p>
+            </div>
+            <div class="card success">
+              <h4>Recovers broken systems</h4>
+              <p>After a host reboot it couldn't explain <em>why</em> the box went down — but it spotted that a Postgres data disk failed to mount, edited <code>/etc/fstab</code>, remounted, restarted Postgres, and brought the service back.</p>
+            </div>
+            <div class="card success">
+              <h4>Handles gnarly K8s commands &amp; manifests</h4>
+              <p>Runs the long kubectl incantations directly. Comfortable with the awkward manifest bits too — hostPath mounts, GPU mounts, secret management.</p>
+            </div>
+            <div class="card success">
+              <h4>Reads error logs &amp; fixes itself</h4>
+              <p>On a failure, it tails the logs, isolates the offending stack frame, and patches the code directly — no hand-holding.</p>
+            </div>
+          </div>
+          <p class="callout">"Just give it the URL" worked far more often than I expected.</p>
+          <aside class="notes">
+            I expected to write per-community parsers. I mostly didn't have to. Beyond that, three more things surprised me on the ops side. First, debugging from logs — when something fails, Claude reads the error output, walks the trace, and patches the code without me having to translate the failure into a prompt. Second, recovery after a real outage. One of the homelab nodes rebooted on its own. Claude couldn't tell me why the host went down — that question is out of its reach — but it noticed the Postgres data disk failed to remount, fixed /etc/fstab, brought the mount back, restarted Postgres. End-to-end recovery without me touching the keyboard. Third, Kubernetes. The long kubectl commands and the fiddly manifest fields — hostPath, GPU resources, secrets — are the parts I always have to look up. Claude just does them.
+          </aside>
+        </section>
+        <section>
+          <h3>Refinements that mattered</h3>
+          <ul class="clean">
+            <li><strong>Timestamp normalization</strong> — store as UTC, render in local TZ</li>
+            <li><strong>HTML selector tuning</strong> — extract body, not chrome/ads</li>
+            <li><strong>DAG isolation</strong> — one community fails ≠ all fail</li>
+            <li><strong>Resource right-sizing</strong> — observe, then bump</li>
+            <li><strong>UI polish</strong> — search bar, dark mode, community/tag filters</li>
+          </ul>
+          <p class="muted" style="font-size:0.7em;">Each one was a 30-minute conversation with Claude — not a 3-day project.</p>
+          <aside class="notes">
+            Notice the smell, describe it, let Claude propose, review, ship. The UI bucket grew over time — once the backend was steady, I started layering on quality-of-life features: a search bar wired up to Elasticsearch, dark mode, and filters by community or tag. Each was a single conversation, not a project.
+          </aside>
+        </section>
+      </section>
+
+      <!-- ============ 8. Outcome ============ -->
+      <section>
+        <section>
+          <span class="section-label">08 · Outcome</span>
+          <h2>The result that lands on my phone</h2>
+          <p class="subtitle">From scattered communities to one morning digest.</p>
+          <aside class="notes">
+            Show the end product.
+          </aside>
+        </section>
+        <section>
+          <h3>Local LLM — two jobs</h3>
+          <div class="mermaid">
+flowchart LR
+  PG[("Postgres")] --> NSFW["Local LLM<br/>NSFW classifier<br/>(title + body)"]
+  NSFW -->|"flag"| PG
+  PG --> Top["Top-10 per community<br/>(NSFW filtered out)"]
+  Top --> Sum1["Local LLM<br/>per-community summary"]
+  Sum1 --> Sum2["Local LLM<br/>cross-community summary"]
+  Sum2 --> TG["Telegram"]
+          </div>
+          <p class="muted" style="font-size:0.6em;">Same Mac Studio, two pipelines: an NSFW classifier on incoming posts, and a two-pass summarizer for the daily digest.</p>
+          <aside class="notes">
+            Once the local LLM was sitting on the Mac Studio, it was easy to give it more than one job. Job one — classification. For every new post, the model looks at the title and the body and decides whether it's NSFW. The flag goes back into Postgres alongside the post. Job two — summarization. Same model, two passes: per-community first, then a meta-summary across all of them. The NSFW filter feeds the top-10 selection, so the digest never includes anything I'd rather not have on my phone over breakfast. The lesson here is the local LLM stopped being a "summarizer" — it became a generic inference endpoint I could keep adding tasks to.
+          </aside>
+        </section>
+        <section>
+          <h3>What lands on my phone</h3>
+          <div class="grid-2">
+            <div class="col-stack">
+              <ul class="clean">
+                <li>One Telegram message per morning</li>
+                <li>Top topics across my chosen communities</li>
+                <li>Links back to the originals if I want to dive deeper</li>
+              </ul>
+              <p class="callout">No catch-up scrolling. No FOMO. Just what mattered.</p>
+            </div>
+            <div class="media-placeholder">
+              <span class="icon">📲</span>
+              <span class="label">Screenshot placeholder</span>
+              <span>Telegram digest message</span>
+            </div>
+          </div>
+          <aside class="notes">
+            Drop in a real screenshot here. The message is short — if a topic is interesting, I tap through.
+          </aside>
+        </section>
+        <section>
+          <h3>What changed for me</h3>
+          <div class="grid-2">
+            <div class="card success"><h4>Time</h4><p>No more 20-min site hopping at lunch.</p></div>
+            <div class="card success"><h4>Coverage</h4><p>I see more communities now than I used to visit manually.</p></div>
+            <div class="card success"><h4>Signal</h4><p>Pre-ranked by community engagement, not algorithmic feed.</p></div>
+            <div class="card success"><h4>Discovery via digest</h4><p>I don't dig through whole threads anymore. The Telegram digest surfaces the popular posts, and I only follow the ones that look worth my time.</p></div>
+          </div>
+          <aside class="notes">
+            Wider net, less time. Reading what humans found interesting, not what a recommendation engine wants me to see. And the discovery model flipped — I used to hunt through every community to find anything interesting. Now I read the digest first, and only pull up the original post if the summary makes it worth following.
+          </aside>
+        </section>
+      </section>
+
+      <!-- ============ 9. Applications ============ -->
+      <section>
+        <section>
+          <span class="section-label">09 · Applications</span>
+          <h2>What this unlocks next</h2>
+          <p class="subtitle">The collection pipeline is the foundation. Everything else is a remix.</p>
+          <aside class="notes">
+            Once data flows reliably, every new idea is a small downstream module.
+          </aside>
+        </section>
+        <section>
+          <h3>Adjacencies</h3>
+          <div class="grid-2">
+            <div class="card">
+              <h4>Finance digest</h4>
+              <p>Swap the source list for financial communities + news outlets. Same summarization stack. Output: a markets-focused morning brief.</p>
+            </div>
+            <div class="card">
+              <h4>Translated video shorts</h4>
+              <p>Pull foreign-language stories, translate &amp; summarize, generate narration, stitch into short videos for YouTube.</p>
+            </div>
+          </div>
+          <aside class="notes">
+            These aren't theoretical. The first is closest to ready — same pipeline, different sources.
+          </aside>
+        </section>
+        <section>
+          <h3>Takeaways</h3>
+          <ul class="clean">
+            <li><strong>Plan first, code second.</strong> CLAUDE.md is your contract with the agent.</li>
+            <li><strong>Split by machine.</strong> One session per box keeps state clean.</li>
+            <li><strong>Split by agent.</strong> Claude Code for ops, Codex for code, no overlap.</li>
+            <li><strong>Trust the loop.</strong> ArgoCD-driven deploys and SSH-driven hotfixes can coexist.</li>
+            <li><strong>Data is the moat.</strong> Once collection runs, every new feature is days, not months.</li>
+          </ul>
+          <aside class="notes">
+            Five things. Plan, split-by-machine, split-by-agent, trust the loop, value the data layer.
+          </aside>
+        </section>
+        <section>
+          <h2>What would <span class="accent">you</span> build with this pattern?</h2>
+          <p class="subtitle">Open for questions.</p>
+          <aside class="notes">
+            Invite the audience to think about their own scratch-your-own-itch project.
+          </aside>
+        </section>
+      </section>
+
+      <!-- ============ Closing ============ -->
+      <section data-background-gradient="linear-gradient(135deg, #0f3460 0%, #16213e 50%, #1a1a2e 100%)">
+        <h2 class="accent">Thank you</h2>
+        <p class="subtitle">Questions?</p>
+        <aside class="notes">
+          Wrap up.
+        </aside>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- Reveal core + plugins -->
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+
+  <!-- Mermaid as UMD (works with file://) -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+
+  <script>
+    (async function() {
+      // Render mermaid blocks before Reveal initializes
+      if (window.mermaid) {
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: 'dark',
+          themeVariables: {
+            primaryColor: '#0f3460',
+            primaryTextColor: '#e8eef7',
+            primaryBorderColor: '#4a90e2',
+            lineColor: '#4a90e2',
+            secondaryColor: '#16213e',
+            tertiaryColor: '#1a1a2e',
+            fontFamily: 'Inter, sans-serif'
+          }
+        });
+        const blocks = document.querySelectorAll('.mermaid');
+        for (let i = 0; i < blocks.length; i++) {
+          const el = blocks[i];
+          const def = el.textContent.trim();
+          try {
+            const { svg } = await mermaid.render('mermaid-svg-' + i, def);
+            el.innerHTML = svg;
+          } catch (e) {
+            el.innerHTML = '<pre style="color:#ff6b6b">Mermaid render failed: ' + e.message + '</pre>';
+          }
+        }
+      }
+
+      Reveal.initialize({
+        hash: true,
+        slideNumber: 'c/t',
+        transition: 'slide',
+        controls: true,
+        progress: true,
+        center: true,
+        width: 1280,
+        height: 800,
+        margin: 0.06,
+        plugins: [RevealNotes, RevealHighlight]
+      });
+    })();
+  </script>
+</body>
+</html>
