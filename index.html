@@ -475,7 +475,7 @@
             <div class="card"><h4>Summarize &amp; deliver</h4><p>Daily digest of what mattered, sent to my phone.</p></div>
           </div>
           <aside class="notes">
-            Three things I wanted. Notice these aren't engineering choices yet — these are the user-facing outcomes.
+            Three things I wanted: collect, store-and-search, summarize-and-deliver.
           </aside>
         </section>
         <section>
@@ -487,7 +487,7 @@
             <li><strong>Claude Code / Codex</strong> — and a willingness to let them drive</li>
           </ul>
           <aside class="notes">
-            I didn't start from zero on infra. Three pieces of hardware and two coding agents — Claude Code and Codex. The GCP VM is more than just a heartbeat-checker, by the way: it has a public IP, so anything that needs to be reachable from the outside world ends up there. The interesting part of the talk is how the agents stitched all of this into something coherent.
+            I didn't start from zero on infra. Three pieces of hardware and two coding agents — Claude Code and Codex. The GCP VM is more than just a heartbeat-checker: it has a public IP, so anything that needs to be reachable from outside the home network ends up there. The interesting part of the talk is how the agents stitched all of this into something coherent.
           </aside>
         </section>
         <section class="compact-cards">
@@ -511,7 +511,7 @@
             </div>
           </div>
           <aside class="notes">
-            Four things that paid off the most. Top row is the conceptual pair — *how to think*: plan big and chunk it down, then ship the bare minimum and let real failures drive iteration. Bottom row is the concrete mechanics — *how to execute*: front-load specificity into CLAUDE.md so the agent doesn't have to guess (using another LLM like ChatGPT or Gemini for the draft is fair game and saves a lot of Claude-Codex ping-pong), and when running multiple agents in parallel, draw clear non-overlapping lanes so they don't step on each other's work. If you remember one slide from this talk, this is it.
+            Four things to call out. Top row is the conceptual pair — *how to think*: plan big and chunk it down, then ship the bare minimum and let real failures drive iteration. Bottom row is the concrete mechanics — *how to execute*: front-load specificity into CLAUDE.md so the agent doesn't have to guess (using another LLM like ChatGPT or Gemini for the draft is fair game and saves a lot of Claude-Codex ping-pong), and when running multiple agents in parallel, draw clear non-overlapping lanes so they don't step on each other's work.
           </aside>
         </section>
       </section>
@@ -559,13 +559,12 @@
         <section>
           <h3>The bonus realization</h3>
           <p class="subtitle accent">Once data is collected, new uses appear.</p>
-          <div class="grid-3">
+          <div class="grid-2">
             <div class="card"><h4>Daily digests</h4><p>Local LLM summarizes overnight.</p></div>
             <div class="card"><h4>Trend signals</h4><p>What topics are heating up across communities?</p></div>
-            <div class="card"><h4>Foundation</h4><p>Translation, video pipelines — all downstream of the collected corpus.</p></div>
           </div>
           <aside class="notes">
-            The collection is the boring half. The interesting half is what you can build on top once the data flows.
+            The collection is the boring half. The interesting half is what you can build on top once the data flows. The two we've actually shipped are the daily digest and a sense of which topics are heating up across communities. There's more downstream — translation, video — but I'll keep this slide honest and only show what's running.
           </aside>
         </section>
       </section>
@@ -731,7 +730,7 @@
           </div>
           <p class="muted" style="font-size:0.6em;margin-top:0.6em;">Home network (MacBook · Homelab · Mac Studio) ⟷ VPN ⟷ External (GCP VM)</p>
           <aside class="notes">
-            The whole thing only works because everything sits on the same VPN. The MacBook can SSH into the homelab and the Mac Studio as if they were local. Note the agents riding on top of each machine — that's a visual we'll reuse later.
+            The whole thing only works because everything sits on the same Tailscale tailnet. The MacBook reaches the homelab and the Mac Studio as if they were local. Worth calling out: I didn't install Tailscale on any of these boxes by hand — Claude Code did. I had it SSH into each machine in turn (homelab, Mac Studio, GCP VM), run the install, auth the node, and join the tailnet. So even the VPN itself was bootstrapped through the same agent-on-the-box pattern you see in this diagram. Note the agents riding on top of each machine — that's a visual we'll reuse later.
           </aside>
         </section>
         <section>

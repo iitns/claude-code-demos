@@ -50,7 +50,7 @@
 > Two pains. Fragmented — every community is its own site. And time-expensive — I'd hunt through threads to find the few that actually mattered. The thought was simple: if I just had everything in one place, I could decide what's worth my attention.
 
 ### 2.4 The bonus realization
-> Here's the part I didn't fully appreciate at the start. Once the data was collected, new uses appeared on their own. Daily digests. Trend signals. Eventually translation and video. The collection pipeline became a foundation, not an endpoint.
+> Here's the part I didn't fully appreciate at the start. Once the data was collected, new uses appeared on their own — two so far. The daily digest, summarized by the local LLM overnight. And a sense of which topics are heating up across communities. I'm being honest on this slide: there's more downstream I haven't built yet — translation and video pipelines come to mind — but I'll talk about those at the end, not here.
 
 ## 3. Infra (~2.5 min)
 
@@ -62,6 +62,8 @@
 
 ### 3.3 How they're connected
 > [Walk through the diagram.] On the left, my home network — the MacBook, the homelab, the Mac Studio. On the right, external — the GCP VM. They're all stitched together by Tailscale in the middle. Notice the little agents riding on top of each box. That's the visual — the agent is the thing actually doing work *on* the box. The MacBook is where Claude Code and Codex live, and from there they reach any machine as if it were local.
+>
+> One detail worth calling out: I didn't install Tailscale on any of these boxes by hand. I had Claude Code SSH into each machine in turn — homelab, Mac Studio, GCP VM — run the install, authenticate the node, and join it to the tailnet. So even the VPN itself was bootstrapped through the same agent-on-the-box pattern you see in this diagram. The fastest way to wire up multi-machine infra turned out to be: let the agent do the wiring.
 
 ### 3.4 Why the VPN matters
 > Without a flat addressable network, multi-machine agent work is painful. Tailscale is what makes "one agent, many machines" actually work. One SSH config, every node reachable, no public exposure of homelab services. This was load-bearing for the whole project.
